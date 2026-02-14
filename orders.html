@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Viewer - DataFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/orders.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>DataFlow</h1>
+        </div>
+        <nav class="nav">
+            <a href="orders.html" class="active">Orders</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="orders-section">
+            <div class="container">
+                <div class="orders-header">
+                    <h1>📋 Orders Viewer</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="refreshOrders()">🔄 Refresh</button>
+                        <button class="btn btn-primary" onclick="downloadExcel()">📥 Download Excel</button>
+                    </div>
+                </div>
+
+                <div class="info-bar">
+                    <span>Orders auto-refresh every 30 seconds</span>
+                    <span id="lastUpdate">Loading...</span>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Revenue (GHS)</div>
+                        <div class="stat-value" id="totalRevenue">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div id="ordersTable">
+                        <div class="loading">Loading orders...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshOrders();
+            // Auto-refresh every 30 seconds
+            setInterval(refreshOrders, 30000);
+        });
+
+        function refreshOrders() {
+            console.log('Fetching orders from:', `${API_BASE_URL}/orders?limit=1000`);
+            fetch(`${API_BASE_URL}/orders?limit=1000`)
+                .then(response => {
+                    console.log('Response received:', response.status, response.statusText);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received:', data);
+                    const orders = data.orders || [];
+                    console.log('Orders count:', orders.length);
+                    displayOrders(orders);
+                    updateStats(orders);
+                    updateLastRefresh();
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    document.getElementById('ordersTable').innerHTML = `
+                        <div class="empty-state">
+                            <h2>⚠️ Error Loading Orders</h2>
+                            <p>Could not connect to server. Make sure the backend is running.</p>
+                            <p>Error: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersTable');
+            console.log('displayOrders called with', orders.length, 'orders');
+            console.log('Orders:', orders);
+
+            if (orders.length === 0) {
+                console.log('No orders found');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No Orders Yet</h2>
+                        <p>Orders will appear here once customers make purchases.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Transaction ID</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Network</th>
+                            <th>Bundle</th>
+                            <th>Amount (GHS)</th>
+                            <th>Status</th>
+                            <th>Date/Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orders.map(order => `
+                            <tr>
+                                <td>${order.id}</td>
+                                <td><strong>${order.transaction_id}</strong></td>
+                                <td>${order.customer_name}</td>
+                                <td>${order.email}</td>
+                                <td>${order.phone}</td>
+                                <td>${order.network.toUpperCase()}</td>
+                                <td>${order.bundle}</td>
+                                <td><strong>GHS ${parseFloat(order.amount).toFixed(2)}</strong></td>
+                                <td><span class="status-badge status-completed">${order.status}</span></td>
+                                <td>${order.date_time}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        function updateStats(orders) {
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.amount), 0);
+
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
+        }
+
+        function updateLastRefresh() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+        }
+
+        function downloadExcel() {
+            // Redirect to the Excel export endpoint
+            window.location.href = `${API_BASE_URL}/orders/export/excel`;
+        }
+    </script>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 DataFlow. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#contact">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

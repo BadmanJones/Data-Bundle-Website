@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success - DataFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>DataFlow</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="buy.html">Buy Data</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="success-section">
+            <div class="container">
+                <div class="success-container">
+                    <div class="success-icon">✓</div>
+                    <h1>Payment Successful!</h1>
+                    <p class="success-message">Your data bundle has been delivered to your phone</p>
+
+
+                    <!-- Order Summary -->
+                    <div class="success-summary">
+                        <h2>Order Details</h2>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Transaction ID:</span>
+                            <span class="detail-value" id="txnId">TXN-2024-001234</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Network:</span>
+                            <span class="detail-value" id="detailNetwork">MTN</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Data Bundle:</span>
+                            <span class="detail-value" id="detailBundle">2GB</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Phone Number:</span>
+                            <span class="detail-value" id="detailPhone">0201234567</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Amount Paid:</span>
+                            <span class="detail-value" id="detailAmount">GHS 10.99</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Date & Time:</span>
+                            <span class="detail-value" id="detailDate">2024-01-15 14:30:45</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value status-success">Completed</span>
+                        </div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="next-steps">
+                        <h3>What's Next?</h3>
+                        <ol>
+                            <li>Your data bundle is now active on your phone</li>
+                            <li>You can check your balance on your network's USSD code</li>
+                            <li>A confirmation SMS has been sent to your phone</li>
+                            <li>Keep your transaction ID for support inquiries</li>
+                        </ol>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="success-actions">
+                        <a href="buy.html" class="btn btn-secondary">Buy Another Bundle</a>
+                        <a href="index.html" class="btn btn-outline">Back to Home</a>
+                    </div>
+
+                    <!-- Support -->
+                    <div class="support-box">
+                        <h3>Need Help?</h3>
+                        <p>If you didn't receive your data or have any questions, contact our support team:</p>
+                        <div class="contact-info">
+                            <span>📧 <a href="mailto:support@dataflow.com">support@dataflow.com</a></span>
+                            <span>📞 +233 XXX XXX XXXX</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 DataFlow. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#contact">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Send order to backend when success page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Success page loaded');
+            populateSuccessPage();
+            
+            // Send order to backend
+            const transactionDataStr = sessionStorage.getItem('transactionData');
+            console.log('Transaction data from session:', transactionDataStr);
+            
+            if (transactionDataStr) {
+                try {
+                    const transactionData = JSON.parse(transactionDataStr);
+                    console.log('Parsed transaction data:', transactionData);
+                    console.log('Status:', transactionData.status);
+                    console.log('sendOrderToAdminBackend function exists?', typeof sendOrderToAdminBackend);
+                    
+                    // Send to backend - always send when on success page
+                    console.log('Calling sendOrderToAdminBackend...');
+                    sendOrderToAdminBackend(transactionData);
+                } catch (error) {
+                    console.error('Error sending order to backend:', error);
+                }
+            } else {
+                console.warn('No transaction data in session storage');
+            }
+        });
+    </script>
+</body>
+</html>
