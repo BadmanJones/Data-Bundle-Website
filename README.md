@@ -1,183 +1,52 @@
-# 🎯 DataFlow - Complete Admin Backend & Order Management System
+# 🎯 DataFlow - Data Bundle Sales Platform
 
-## 👋 Welcome!
-
-You now have a **production-ready admin backend** for your DataFlow data bundle sales platform. This includes a professional order management system, secure authentication, and real-time statistics.
+A complete, production-ready data bundle e-commerce platform with Paystack payment integration, order management, and admin dashboard.
 
 ```
 ┌────────────────────────────────────────────────┐
-│     DataFlow Admin Backend - Complete! ✅     │
+│     DataFlow - Data Bundle Platform ✅        │
 ├────────────────────────────────────────────────┤
-│ ✅ Express.js Server                          │
+│ ✅ Paystack Payment Integration               │
+│ ✅ Express.js REST Backend                    │
 │ ✅ SQLite Database                            │
-│ ✅ Admin Dashboard                            │
-│ ✅ Authentication System                      │
-│ ✅ Order Management                           │
-│ ✅ Analytics & Reporting                      │
-│ ✅ CSV Export                                 │
-│ ✅ Comprehensive Documentation               │
+│ ✅ Orders Management Dashboard                │
+│ ✅ Real-time Order Tracking                   │
+│ ✅ Excel Export Functionality                 │
+│ ✅ Multi-Network Support                      │
+│ ✅ Responsive Mobile-Friendly Design          │
 └────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ Get Started in 3 Steps
+## ⚡ Quick Start (3 Steps)
 
-### 1️⃣ Install Dependencies (30 seconds)
+### 1️⃣ Install Dependencies
 ```bash
 npm install
 ```
 
-### 2️⃣ Start the Server (10 seconds)
+### 2️⃣ Start Server
 ```bash
 npm start
 ```
 
-### 3️⃣ Open Admin Dashboard (5 seconds)
-```
-http://localhost:3000/admin
-Login: admin / admin123
-```
+### 3️⃣ Open in Browser
+- **Homepage:** http://localhost:3000
+- **Buy Data:** http://localhost:3000/buy.html
+- **View Orders:** http://localhost:3000/orders.html
 
-**That's it! Your dashboard is ready! 🎉**
-
----
-
-## 📚 Documentation
-
-### Start Here 👇
-
-- **[QUICKSTART.md](QUICKSTART.md)** ⭐ Start here for 5-minute setup
-- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete setup & integration
-- **[INDEX.md](INDEX.md)** - Full documentation index
-
-### Complete Guides
-
-- **[ADMIN_README.md](ADMIN_README.md)** - Full feature documentation
-- **[FEATURES_OVERVIEW.md](FEATURES_OVERVIEW.md)** - Detailed feature descriptions
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Complete system overview
-
-### Integration & Troubleshooting
-
-- **[INTEGRATION_SNIPPET.js](INTEGRATION_SNIPPET.js)** - Copy-paste code for your app.js
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem solving guide
+**That's it! 🎉**
 
 ---
 
-## 🎯 What's Included
+## 📖 Documentation
 
-### Backend Server
-- ✅ Express.js REST API
-- ✅ SQLite database (no installation needed)
-- ✅ JWT authentication
-- ✅ Order management endpoints
-- ✅ Statistics & analytics
-- ✅ CSV export functionality
-
-### Admin Dashboard
-- ✅ Professional interface
-- ✅ Real-time statistics
-- ✅ Order search & filtering
-- ✅ Order details view
-- ✅ Analytics dashboard
-- ✅ CSV export
-- ✅ Responsive design (mobile-friendly)
-
-### Security
-- ✅ Secure login system
-- ✅ Password hashing
-- ✅ JWT tokens
-- ✅ CORS protection
-- ✅ Input validation
-
-### Documentation
-- ✅ 8 comprehensive guides
-- ✅ 100+ KB of documentation
-- ✅ Code examples
-- ✅ Troubleshooting guide
-- ✅ Integration instructions
-
----
-
-## 🚀 Quick Start Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Start the server
-npm start
-
-# The server runs at:
-# http://localhost:3000
-# Admin dashboard at:
-# http://localhost:3000/admin
-```
-
----
-
-## 🎨 System Features
-
-### Dashboard Overview
-- Total orders count
-- Completed orders
-- Pending orders
-- Total revenue in GHS
-- Recent orders list
-
-### Order Management
-- 🔍 Search by customer name, email, phone, transaction ID
-- 📊 Filter by network (MTN, Telecel, AirtelTigo)
-- 🏷️ Filter by status (pending, completed, failed, cancelled)
-- 📋 View complete order details
-- 🗑️ Delete orders
-- 📊 View order history
-
-### Analytics
-- Order breakdown by network
-- Status distribution
-- Success rates
-- Average order value
-- Revenue tracking
-
-### Data Export
-- 📥 Export orders to CSV
-- 💾 Compatible with Excel
-- 📈 Use for analysis and accounting
-
----
-
-## 📊 System Architecture
-
-```
-Customer Places Order (buy.html)
-           ↓
-    Paystack Payment
-           ↓
-Payment Successful?
-    ↙         ↘
-   NO        YES
-   ↓          ↓
-Show Error  sendOrderToAdminBackend()
-    ↓          ↓
-  Retry    Express API
-             ↓
-           Validate
-             ↓
-          SQLite DB
-             ↓
-        Admin Dashboard
-```
-
----
-
-## 🔐 Login Credentials
-
-**Default Admin Account:**
-- Username: `admin`
-- Password: `admin123`
-
-⚠️ **Important:** Change these credentials before going live!
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute setup guide
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
+- **[FEATURES_OVERVIEW.md](FEATURES_OVERVIEW.md)** - Feature descriptions
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem solving
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - System overview
 
 ---
 
@@ -185,233 +54,265 @@ Show Error  sendOrderToAdminBackend()
 
 ```
 data-bundle-website/
-├── server.js                    # Backend server
-├── admin.html                  # Admin dashboard
-├── package.json                # Dependencies
-├── .env                       # Configuration
-├── database/                  # Database folder
-│   └── orders.db             # SQLite database (auto-created)
+├── server.js                    # Express backend server
+├── index.html                  # Homepage
+├── buy.html                    # Purchase form with Paystack
+├── success.html                # Payment confirmation page
+├── orders.html                 # Orders dashboard/viewer
+├── package.json                # NPM dependencies
+├── database/
+│   └── orders.db              # SQLite database (auto-created)
 ├── js/
-│   ├── app.js                # Main app (integrate here!)
-│   └── admin-dashboard.js    # Dashboard logic
+│   └── app.js                 # Main application logic
 ├── css/
-│   ├── style.css             # Main styles
-│   └── admin-style.css       # Dashboard styles
-└── Documentation files        # (see below)
+│   ├── style.css              # Main site styles
+│   └── orders.css             # Dashboard styles
+└── Images/                    # Image assets
 ```
 
 ---
 
-## 📖 Documentation Files
+## 🛍️ Features
 
-| File | Purpose | Time |
-|------|---------|------|
-| **QUICKSTART.md** | 5-minute setup | 5 min |
-| **SETUP_GUIDE.md** | Detailed setup | 15 min |
-| **INTEGRATION_SNIPPET.js** | Code to integrate | 10 min |
-| **ADMIN_README.md** | Complete features | 30 min |
-| **FEATURES_OVERVIEW.md** | Feature details | 20 min |
-| **TROUBLESHOOTING.md** | Problem solutions | Reference |
-| **PROJECT_SUMMARY.md** | System overview | 10 min |
-| **INDEX.md** | Documentation index | Reference |
+### Customer Side (buy.html)
+- Network selection (MTN, Telecel, AirtelTigo)
+- Multiple data bundle options
+- Customer information form (name, email, phone)
+- Real-time price display
+- Paystack payment integration
+- Order confirmation page
+
+### Admin Side (orders.html)
+- Dashboard with order statistics
+- Total orders count
+- Total revenue tracking (GHS)
+- Complete order list with details
+- Auto-refresh every 30 seconds
+- Manual refresh button
+- Download orders as Excel file
+- Responsive design for mobile/tablet
+
+### Database
+- SQLite with automatic initialization
+- Tracks: transaction ID, customer details, network, bundle, amount, payment date
+- Auto-timestamps for order creation
 
 ---
 
-## 🔗 Integration with Your Buy Page
+## 💳 Payment Flow
 
-Your buy page needs to send orders to the backend. Here's how:
+1. **Customer places order** → Fills form on buy.html
+2. **Selects payment method** → Clicks "Pay Now"
+3. **Paystack modal opens** → Payment processing
+4. **Payment confirmed** → Paystack callback fires
+5. **Order saved** → Data sent to backend
+6. **Confirmation page** → Customer sees success.html
+7. **Admin sees order** → Updates in orders.html
 
-1. **Copy this function** from [INTEGRATION_SNIPPET.js](INTEGRATION_SNIPPET.js)
-2. **Paste into** `js/app.js`
-3. **Call after payment success** in your payment handler
+---
 
+## 📊 API Endpoints
+
+All endpoints return JSON and are hosted at `http://localhost:3000/api`
+
+### POST /api/orders
+Create a new order
 ```javascript
-// After successful Paystack payment, call:
-sendOrderToAdminBackend(orderData);
+{
+  "transaction_id": "TXN-xxx",
+  "customer_name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0551234567",
+  "network": "mtn",
+  "bundle": "2GB",
+  "amount": 11.99,
+  "paystack_reference": "REF-xxx",
+  "date_time": "14-02-2026, 12:00:00",
+  "status": "completed"
+}
 ```
 
-See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed integration steps.
+### GET /api/orders
+Fetch all orders (returns array)
+
+### GET /api/orders/export/excel
+Download orders as Excel file
 
 ---
 
-## ✨ Key Features
+## 🌐 Supported Networks
 
-### For Your Customers
-- Fast, secure checkout
-- Multiple network options
-- Instant confirmation
-- Email receipt (if configured)
+| Network | Packages Available |
+|---------|------------------|
+| **MTN** | 1GB, 2GB, 4GB, 5GB, 10GB, 20GB, 50GB, 80GB, 100GB |
+| **Telecel** | 1GB, 2GB, 4GB, 5GB, 10GB, 20GB, 50GB, 80GB, 100GB |
+| **AirtelTigo** | 1GB, 2GB, 4GB, 5GB, 10GB, 20GB, 50GB, 80GB, 100GB |
 
-### For You (Admin)
-- Real-time order tracking
-- Customer insights
-- Revenue monitoring
-- Data analytics
-- Easy data export
-- Professional interface
-
-### For Your Business
-- Automated order processing
-- Reduced manual work
-- Better data organization
-- Easy reporting
-- Scalable system
+Prices and bundles can be customized in `js/app.js`
 
 ---
 
-## 🎯 Next Steps
+## 🔧 Configuration
 
-### Immediate (Right Now)
-1. Run `npm install`
-2. Run `npm start`
-3. Visit `http://localhost:3000/admin`
-4. Login with `admin` / `admin123`
+### Paystack
+The live Paystack key is configured in `js/app.js`:
+```javascript
+const PAYSTACK_PUBLIC_KEY = 'REDACTED';
+```
 
-### Within 30 Minutes
-1. Integrate with your buy page
-2. Test with a sample order
-3. Verify order appears in dashboard
+### Server Port
+Default port is 3000. Change in `server.js` if needed:
+```javascript
+const PORT = process.env.PORT || 3000;
+```
 
-### Before Going Live
-1. Change admin password
-2. Update configuration
-3. Test thoroughly
-4. Set up backups
-
-### Going Live
-1. Deploy to production
-2. Set up HTTPS
-3. Configure domain
-4. Monitor system
+### Database
+SQLite database auto-creates at `database/orders.db`
 
 ---
 
-## 🆘 Need Help?
+## 🚀 Deployment
 
-### Having Issues?
-1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-2. Verify server is running: `npm start`
-3. Check browser console for errors (F12)
+### Local Testing
+```bash
+npm install
+npm start
+```
 
-### Want More Details?
-1. Start with [QUICKSTART.md](QUICKSTART.md)
-2. Read [SETUP_GUIDE.md](SETUP_GUIDE.md)
-3. Check [INDEX.md](INDEX.md) for all docs
-
-### Looking for Code?
-1. See [INTEGRATION_SNIPPET.js](INTEGRATION_SNIPPET.js)
-2. Review [ADMIN_README.md](ADMIN_README.md) API section
-3. Check server.js for implementation
-
----
-
-## 💻 System Requirements
-
-- **Node.js** 14+ (Download from nodejs.org)
-- **npm** (comes with Node.js)
-- **Modern browser** (Chrome, Firefox, Safari, Edge)
-- **Port 3000** available
+### Production Deployment
+1. Install Node.js on server
+2. Clone repository
+3. Run `npm install`
+4. Configure environment variables
+5. Run `npm start`
+6. Set up reverse proxy (nginx/Apache)
+7. Enable HTTPS/SSL
+8. Monitor with process manager (PM2)
 
 ---
 
-## 📊 What You Can Track
+## 🛠️ Troubleshooting
 
-- ✅ Total orders received
-- ✅ Revenue generated (GHS)
-- ✅ Order success rate
-- ✅ Network popularity
-- ✅ Bundle preferences
-- ✅ Customer information
-- ✅ Payment timestamps
-- ✅ Transaction references
+### Server won't start
+- Check if port 3000 is in use: `netstat -an | find "3000"`
+- Ensure Node.js is installed: `node --version`
+- Run `npm install` first
 
----
+### Orders not saving
+- Check server console for errors
+- Verify database folder exists
+- Ensure Paystack payment succeeded
 
-## 🔒 Security Built-In
+### Payment not working
+- Verify Paystack live key is correct
+- Check browser console (F12) for errors
+- Test payment with test amount first
 
-- ✅ Secure password hashing
-- ✅ JWT token authentication
-- ✅ Input validation
-- ✅ CORS protection
-- ✅ SQL injection prevention
-- ✅ Secure error handling
+See **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** for more solutions.
 
 ---
 
-## 📈 Growth Ready
+## 📱 Browser Support
 
-- Handles 1,000+ orders easily
-- Fast search on large datasets
-- Smooth dashboard performance
-- Scalable to 100,000+ orders
-- Upgrade path to PostgreSQL
-
----
-
-## 🎓 Learning Resources
-
-### Included Documentation
-- 8 comprehensive guides (100+ KB)
-- Step-by-step instructions
-- Code examples
-- Troubleshooting guide
-- API reference
-
-### External Resources
-- [Node.js Docs](https://nodejs.org/)
-- [Express.js Docs](https://expressjs.com/)
-- [SQLite Docs](https://sqlite.org/)
+- ✅ Chrome/Chromium
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ Mobile browsers
 
 ---
 
-## ✅ Quality Assurance
+## 📦 Dependencies
 
-- ✅ Professional code quality
-- ✅ Comprehensive error handling
-- ✅ Input validation
-- ✅ Security best practices
-- ✅ Scalable architecture
-- ✅ Complete documentation
-- ✅ Easy to maintain
-- ✅ Easy to extend
+- **express** - Web server framework
+- **sqlite3** - Database
+- **cors** - Cross-origin requests
+- **body-parser** - JSON parsing
 
 ---
 
-## 🎉 You're Ready!
+## 📋 What Gets Tracked
 
-Everything is set up and ready to go. 
+Per order:
+- ✅ Unique transaction ID
+- ✅ Customer name & email
+- ✅ Phone number
+- ✅ Selected network
+- ✅ Data bundle purchased
+- ✅ Amount paid (GHS)
+- ✅ Paystack reference
+- ✅ Date and time
+- ✅ Payment status
+- ✅ Creation timestamp
 
-### Your next step:
+---
+
+## 💡 Tips
+
+1. **Test payments** - Use test mode in Paystack first
+2. **Regular backups** - Back up database/orders.db regularly
+3. **Monitor logs** - Check server console during testing
+4. **Mobile friendly** - Test on mobile devices before launch
+5. **Load testing** - Can handle thousands of orders
+
+---
+
+## 🔐 Security Notes
+
+- ✅ Paystack handles payment security
+- ✅ Data stored locally in SQLite
+- ✅ CORS enabled for development
+- ✅ Input validation on backend
+- ⚠️ No user authentication on orders.html (add for production)
+
+---
+
+## 📞 Support
+
+### Documentation
+1. [QUICKSTART.md](QUICKSTART.md) - Fast setup
+2. [SETUP_GUIDE.md](SETUP_GUIDE.md) - Detailed guide
+3. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues
+
+### Debug
+1. Check browser console: Press F12
+2. Check server console: Terminal output
+3. Check database: Manually query orders.db
+
+---
+
+## 📄 License
+
+Open source - Free to use for personal and commercial projects
+
+---
+
+## ✅ Checklist Before Launch
+
+- [ ] Paystack live key configured
+- [ ] Test payment completed successfully
+- [ ] Orders appear in dashboard
+- [ ] Excel export works
+- [ ] Mobile responsive design verified
+- [ ] Database backups setup
+- [ ] Domain/SSL configured
+- [ ] Performance tested
+
+---
+
+## 🚀 Ready to Launch?
+
+Your platform is complete and ready!
 
 ```bash
 npm install
 npm start
 ```
 
-Then visit: `http://localhost:3000/admin`
+Then open: http://localhost:3000
+
+**Start selling data bundles today! 💪**
 
 ---
 
-## 📞 Support
-
-For comprehensive help:
-1. **Quick Start** → [QUICKSTART.md](QUICKSTART.md)
-2. **Full Setup** → [SETUP_GUIDE.md](SETUP_GUIDE.md)
-3. **Problems** → [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-4. **All Docs** → [INDEX.md](INDEX.md)
-
----
-
-## 🚀 Let's Go!
-
-Your professional admin backend is ready. Orders are waiting to be tracked!
-
-**Start with:** `npm install && npm start`
-
-**Questions?** Check [INDEX.md](INDEX.md) for documentation navigation.
-
----
-
-**Happy order management! 🎉**
-
-*DataFlow Admin Backend - Making order management easy*
+*DataFlow - Making data bundle sales simple*

@@ -1,295 +1,459 @@
-# DataFlow Admin Backend - Setup & Integration Guide
+# DataFlow - Setup & Installation Guide
 
-## Overview
+Complete step-by-step guide to set up and run the DataFlow platform locally.
 
-You now have a complete admin backend system for your DataFlow data bundle website. This system consists of:
+---
 
-1. **Node.js/Express Server** - REST API for managing orders
-2. **SQLite Database** - Stores all order data
-3. **Admin Dashboard** - Beautiful interface to view and manage orders
-4. **Authentication** - Secure login system with JWT
+## 📋 Prerequisites
 
-## What's Included
+Before starting, ensure you have:
 
-### New Files Created:
+1. **Node.js** (14.x or higher)
+   - Download: https://nodejs.org/
+   - Verify: `node --version`
 
-1. **server.js** - Main backend server with all API endpoints
-2. **admin.html** - Admin dashboard interface
-3. **js/admin-dashboard.js** - Dashboard functionality
-4. **css/admin-style.css** - Dashboard styling
-5. **.env** - Environment configuration
-6. **package.json** - Updated with required dependencies
+2. **npm** (comes with Node.js)
+   - Verify: `npm --version`
 
-## Step-by-Step Setup
+3. **A text editor** (VS Code recommended)
+   - Download: https://code.visualstudio.com/
 
-### Step 1: Install Node.js (if not already installed)
+4. **A modern web browser**
+   - Chrome, Firefox, Safari, or Edge
 
-Download from: https://nodejs.org/
-- Choose the LTS (Long Term Support) version
-- Install with default settings
+---
 
-Verify installation:
+## 🚀 Installation Steps
+
+### Step 1: Navigate to Project Folder
+
+Open PowerShell/Command Prompt and navigate to your project:
+
 ```bash
-node --version
-npm --version
+cd C:\Users\ESLI\Desktop\Project\data-bundle-website
 ```
 
 ### Step 2: Install Dependencies
 
-Open PowerShell/Command Prompt in your project folder and run:
+Install all required Node.js packages:
 
 ```bash
 npm install
 ```
 
 This installs:
-- express (web server)
-- sqlite3 (database)
-- bcryptjs (password security)
-- jsonwebtoken (authentication)
-- cors (cross-origin requests)
-- body-parser (JSON parsing)
+- `express` - Web server framework
+- `sqlite3` - Database
+- `cors` - Cross-origin support
+- `body-parser` - JSON parsing
+
+**Output should show:** "added X packages in Y seconds"
 
 ### Step 3: Start the Server
+
+Launch the backend server:
 
 ```bash
 npm start
 ```
 
-You should see:
+**Expected output:**
 ```
 ========================================
-DataFlow Admin Backend Server
+DataFlow Server Running
 ========================================
 Server running at: http://localhost:3000
-Admin Panel: http://localhost:3000/admin
 ========================================
 ```
 
-### Step 4: Access Admin Dashboard
+### Step 4: Open in Browser
 
-Open your browser and go to:
-```
-http://localhost:3000/admin
-```
+Visit these URLs:
 
-Login with:
-- Username: `admin`
-- Password: `admin123`
+- **Homepage:** http://localhost:3000
+- **Buy Data:** http://localhost:3000/buy.html
+- **View Orders:** http://localhost:3000/orders.html
 
-## Integrating with Your Buy Page
-
-To automatically save orders from the buy page to the admin backend:
-
-### Add this code to app.js (after successful payment):
-
-```javascript
-/**
- * Send order to admin backend database
- */
-function sendOrderToAdminBackend(orderData) {
-    const url = 'http://localhost:3000/api/orders';
-    
-    const payload = {
-        transaction_id: orderData.txnId,
-        customer_name: orderData.fullName,
-        email: orderData.email,
-        phone: orderData.phone,
-        network: orderData.network,
-        bundle: orderData.bundle,
-        amount: orderData.amount,
-        paystack_reference: orderData.paystackReference,
-        date_time: orderData.dateTime,
-        status: 'completed'
-    };
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error('Error saving to backend:', data.error);
-        } else {
-            console.log('Order saved to admin backend:', data);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-```
-
-### Call this function after successful Paystack payment:
-
-Find where you handle successful payment in your app.js (look for success.html redirect or similar), and add:
-
-```javascript
-// After successful payment confirmation
-sendOrderToAdminBackend(orderData);
-```
-
-## Dashboard Features Explained
-
-### 📊 Dashboard Tab
-- **Total Orders** - All orders received
-- **Completed** - Successfully processed orders
-- **Pending** - Orders awaiting confirmation
-- **Total Revenue** - All money earned in GHS
-- **Recent Orders** - Last 5 orders placed
-
-### 📋 All Orders Tab
-- **Search** - Find any order by customer name, email, phone, or transaction ID
-- **Filter by Network** - MTN, Telecel, or AirtelTigo
-- **Filter by Status** - Pending, Completed, Failed, or Cancelled
-- **View Details** - Click any order to see full information
-- **Delete** - Remove orders you don't need
-- **Export CSV** - Download all orders to Excel
-
-### 📈 Analytics Tab
-- **Order Distribution** - See which networks are most popular
-- **Success Rates** - Track how many orders are completed
-- **Average Order Value** - Calculate average spending per order
-- **Failed Orders** - Monitor problematic orders
-
-## Database Location
-
-The database file is automatically created at:
-```
-C:\Users\ESLI\Desktop\Project\data-bundle-website\database\orders.db
-```
-
-This is a SQLite database file. You don't need to do anything with it - the system manages it automatically.
-
-## Admin User Management
-
-### Default Login:
-- Username: **admin**
-- Password: **admin123**
-
-### To Change Password:
-
-You'll need to use a tool like SQLite Browser or modify the server.js file. For now, the default credentials are secure enough for development.
-
-## Important: Before Going Live
-
-1. **Change Admin Password** - Don't use default credentials in production
-2. **Use HTTPS** - Enable SSL/TLS on your server
-3. **Change JWT Secret** - Edit the `.env` file
-4. **Backup Database** - Regularly backup your `orders.db` file
-5. **Set Production Mode** - Update `.env` file with NODE_ENV=production
-
-## Testing
-
-### Test if server is running:
-Visit: `http://localhost:3000/api/health`
-
-Should return: `{"status":"Server is running"}`
-
-### Test login:
-```bash
-curl -X POST http://localhost:3000/api/admin/login \
-  -H "Content-Type: application/json" \
-  -d "{\"username\":\"admin\",\"password\":\"admin123\"}"
-```
-
-## Common Issues & Solutions
-
-### Issue: Server won't start
-**Solution:** 
-- Check if port 3000 is available
-- Run `npm install` again
-- Restart your terminal
-
-### Issue: Can't login to admin panel
-**Solution:**
-- Ensure server is running (check terminal)
-- Clear browser cache (Ctrl+Shift+Delete)
-- Try incognito/private window
-- Check browser console for errors (F12)
-
-### Issue: Orders not appearing in dashboard
-**Solution:**
-- Verify the `sendOrderToAdminBackend()` function is called
-- Check Network tab in DevTools to see if requests are sent
-- Check server console for errors
-
-### Issue: Port 3000 already in use
-**Solution:**
-Change the port in server.js:
-```javascript
-const PORT = process.env.PORT || 5000; // Change 3000 to 5000
-```
-
-## File Sizes
-
-- server.js - ~15 KB
-- admin.html - ~12 KB
-- admin-dashboard.js - ~20 KB
-- admin-style.css - ~25 KB
-- Database (orders.db) - Grows as orders are added (starts ~50 KB)
-
-## Next Steps
-
-1. **Start server** - `npm start`
-2. **Access admin** - Go to `http://localhost:3000/admin`
-3. **Integrate with buy page** - Add the order sending code
-4. **Test with sample orders** - Place some test orders
-5. **Monitor dashboard** - Watch orders appear in real-time
-
-## Architecture Diagram
-
-```
-Customer Places Order (buy.html)
-           ↓
-Paystack Payment Processing
-           ↓
-Order Confirmation
-           ↓
-sendOrderToAdminBackend() called
-           ↓
-REST API Endpoint: POST /api/orders
-           ↓
-SQLite Database stores order
-           ↓
-Admin views order in dashboard
-           ↓
-Admin can filter, search, and export
-```
-
-## Production Deployment
-
-When you're ready to go live:
-
-1. **Use a VPS or Cloud Server** - AWS, DigitalOcean, Heroku, etc.
-2. **Use PM2 Process Manager** - Keep server running 24/7
-3. **Set up domain/SSL** - Enable HTTPS
-4. **Backup Strategy** - Automated daily backups
-5. **Monitor Logs** - Set up error tracking
-6. **Scale Database** - Move to PostgreSQL if needed
-
-## Support Resources
-
-- Express.js Docs: https://expressjs.com
-- SQLite Docs: https://www.sqlite.org
-- JWT Info: https://jwt.io
-
-## Summary
-
-Your admin backend is now ready to:
-✅ Receive orders from your buy page
-✅ Store them safely in SQLite database
-✅ Display them in a beautiful dashboard
-✅ Filter and search by any criteria
-✅ Export data to CSV
-✅ Track statistics and analytics
-
-All with a professional, easy-to-use interface! 🎉
+**You're done!** The platform is running. 🎉
 
 ---
 
-**Need help?** Check the ADMIN_README.md file for more detailed information.
+## 🛑 Stopping the Server
+
+To stop the server:
+- Press `Ctrl + C` in the terminal
+
+To restart:
+- Run `npm start` again
+
+---
+
+## 📱 File Guide
+
+| File | Purpose | Accessed At |
+|------|---------|-----------|
+| `index.html` | Homepage | http://localhost:3000 |
+| `buy.html` | Purchase form | http://localhost:3000/buy.html |
+| `success.html` | Confirmation page | Auto-loaded after payment |
+| `orders.html` | Admin dashboard | http://localhost:3000/orders.html |
+| `server.js` | Backend API | Powers all requests |
+| `js/app.js` | Frontend logic | Used by all pages |
+| `css/style.css` | Main styling | Main website styles |
+| `css/orders.css` | Dashboard styling | orders.html styles |
+
+---
+
+## 💾 Database
+
+### Automatic Setup
+- SQLite database auto-creates at: `database/orders.db`
+- Orders table auto-initializes on first server start
+- No additional setup needed
+
+### Database Structure
+```
+orders table:
+├── id (primary key)
+├── transaction_id (unique)
+├── customer_name
+├── email
+├── phone
+├── network
+├── bundle
+├── amount
+├── paystack_reference
+├── date_time
+├── status
+├── created_at
+└── updated_at
+```
+
+---
+
+## 🔌 API Endpoints
+
+### Base URL
+```
+http://localhost:3000/api
+```
+
+### Endpoints Available
+
+#### 1. Create Order
+```
+POST /api/orders
+Content-Type: application/json
+
+{
+  "transaction_id": "TXN-xxx",
+  "customer_name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0551234567",
+  "network": "mtn",
+  "bundle": "2GB",
+  "amount": 11.99,
+  "paystack_reference": "REF-xxx",
+  "date_time": "14-02-2026, 12:00:00",
+  "status": "completed"
+}
+```
+
+#### 2. Get All Orders
+```
+GET /api/orders
+```
+
+Response:
+```json
+{
+  "orders": [
+    {
+      "id": 1,
+      "transaction_id": "TXN-xxx",
+      "customer_name": "John Doe",
+      ...
+    }
+  ]
+}
+```
+
+#### 3. Export to Excel
+```
+GET /api/orders/export/excel
+```
+Downloads orders as `.xlsx` file
+
+---
+
+## ⚙️ Configuration
+
+### Paystack Integration
+
+The Paystack live key is already configured in `js/app.js`:
+
+```javascript
+const PAYSTACK_PUBLIC_KEY = 'REDACTED';
+```
+
+This uses the **LIVE environment** for real transactions.
+
+### Server Port
+
+Default port: `3000`
+
+To change, edit `server.js`:
+```javascript
+const PORT = process.env.PORT || 3000;
+```
+
+Then restart: `npm start`
+
+### Environment Variables
+
+Optional: Create `.env` file in root:
+```
+PORT=3000
+NODE_ENV=production
+```
+
+---
+
+## 🧪 Testing
+
+### Test a Payment
+
+1. Go to: http://localhost:3000/buy.html
+2. Fill in the form:
+   - Network: MTN
+   - Bundle: 1GB
+   - Phone: 0201234567
+   - Name: Test User
+   - Email: test@example.com
+3. Click "Pay Now"
+4. Complete Paystack payment
+5. Should see success page
+6. Check http://localhost:3000/orders.html - order should appear
+
+### Test Orders Page
+
+1. Go to: http://localhost:3000/orders.html
+2. Should show all orders with:
+   - Total orders count
+   - Total revenue (GHS)
+   - Full order table
+   - Excel download button
+3. Click "Refresh" button - should update
+4. Wait 30 seconds - should auto-refresh
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: "npm: The term 'npm' is not recognized"
+
+**Solution:** Node.js not installed
+1. Download from: https://nodejs.org/
+2. Install with default settings
+3. Restart terminal
+4. Run `npm --version` to verify
+
+### Issue: "Error: listen EADDRINUSE: address already in use :::3000"
+
+**Solution:** Port 3000 is in use
+1. Close other applications using port 3000
+2. Or change port in `server.js`
+3. Restart server: `npm start`
+
+### Issue: Server starts but pages won't load
+
+**Solution:** Try hard refresh
+1. Press `Ctrl + Shift + R` (hard refresh)
+2. Or use browser's developer tools (F12) and clear cache
+3. Check server console for errors
+4. Check browser console (F12) for errors
+
+### Issue: Orders not saving to database
+
+**Solution:** Check database connection
+1. Verify `database/orders.db` exists
+2. Check server console for error messages
+3. Verify Paystack payment succeeded
+4. Check that payment data includes all required fields
+
+### Issue: Paystack payment not working
+
+**Solution:** Payment integration issue
+1. Verify live key is configured: `js/app.js` line 66
+2. Check browser console (F12) for JavaScript errors
+3. Verify network connectivity
+4. Test with different amount
+5. Check Paystack dashboard for transaction logs
+
+---
+
+## 📊 Monitoring
+
+### Server Console
+Watch the terminal for:
+- Server startup message
+- Error logs
+- API request logs (if enabled)
+
+### Browser Console
+Press `F12` in browser and check:
+- JavaScript errors
+- Network requests
+- Payment callbacks
+
+Look for: `=== PAYMENT SUCCESS CALLBACK TRIGGERED ===`
+
+### Orders Database
+Quick check:
+1. Go to http://localhost:3000/orders.html
+2. Should display all orders with stats
+3. Total Orders count
+4. Total Revenue (GHS)
+
+---
+
+## 🔄 Workflow
+
+### Customer Journey
+1. Customer visits: http://localhost:3000/buy.html
+2. Selects network and data bundle
+3. Enters contact information
+4. Clicks "Pay Now"
+5. Paystack modal opens
+6. Completes payment
+7. Sees confirmation on success.html
+8. Order saved to database
+
+### Admin Workflow
+1. Admin visits: http://localhost:3000/orders.html
+2. Sees dashboard with statistics
+3. Views all customer orders
+4. Can download orders as Excel
+5. Dashboard auto-refreshes every 30 seconds
+
+---
+
+## 📈 Scaling
+
+### For Local Testing
+- Current setup works perfectly
+- Handles 100+ orders easily
+- SQLite sufficient for small scale
+
+### For Production
+- Recommended: Move to PostgreSQL
+- Set up backup system
+- Enable HTTPS/SSL
+- Use Node process manager (PM2)
+- Set up reverse proxy (nginx)
+
+---
+
+## 🔐 Security Notes
+
+### Current Setup
+- ✅ Paystack handles payment security
+- ✅ Data stored locally
+- ✅ CORS enabled for development
+
+### For Production
+- ⚠️ Add authentication to orders.html
+- ⚠️ Enable HTTPS/SSL
+- ⚠️ Set up database backups
+- ⚠️ Use environment variables for secrets
+- ⚠️ Implement rate limiting
+
+---
+
+## 📦 Project Structure
+
+```
+data-bundle-website/
+├── server.js                 # Backend server
+├── package.json             # Dependencies list
+├── package-lock.json        # Locked versions
+├── .gitignore              # Git ignore rules
+├── index.html              # Homepage
+├── buy.html                # Purchase page
+├── success.html            # Confirmation page
+├── orders.html             # Admin dashboard
+├── database/               # Database folder
+│   └── orders.db          # SQLite database
+├── js/
+│   └── app.js             # Main application logic
+├── css/
+│   ├── style.css          # Main styles
+│   └── orders.css         # Dashboard styles
+├── Images/
+│   └── (image files)
+└── Documentation/
+    ├── README.md
+    ├── SETUP_GUIDE.md (this file)
+    ├── QUICKSTART.md
+    ├── FEATURES_OVERVIEW.md
+    ├── TROUBLESHOOTING.md
+    ├── PROJECT_SUMMARY.md
+    └── INDEX.md
+```
+
+---
+
+## ✅ Verification Checklist
+
+After setup, verify:
+
+- [ ] `npm install` completed without errors
+- [ ] `npm start` shows "Server running"
+- [ ] http://localhost:3000 loads homepage
+- [ ] http://localhost:3000/buy.html shows form
+- [ ] http://localhost:3000/orders.html shows dashboard
+- [ ] Test payment completes successfully
+- [ ] Order appears in orders.html
+- [ ] Excel download works
+
+---
+
+## 🎯 Next Steps
+
+1. **Read QUICKSTART.md** - For faster overview
+2. **Test a payment** - Ensure flow works
+3. **Review FEATURES_OVERVIEW.md** - Understand capabilities
+4. **Customize** - Adjust networks, prices, styling
+5. **Deploy** - When ready for production
+
+---
+
+## 📞 Support
+
+### If Something Breaks
+
+1. **Check TROUBLESHOOTING.md** - Most common issues covered
+2. **Look at server console** - Check for error messages
+3. **Check browser F12** - Look for JavaScript errors
+4. **Restart everything** - `Ctrl+C` then `npm start`
+5. **Reinstall dependencies** - `npm install` again
+
+### Common Messages
+
+- **"Database tables initialized"** ✅ Database ready
+- **"Listening on port 3000"** ✅ Server ready
+- **"PAYMENT SUCCESS CALLBACK TRIGGERED"** ✅ Payment confirmed
+- **"Order saved successfully"** ✅ Order in database
+
+---
+
+## 🚀 Ready?
+
+You're all set! 
+
+```bash
+npm start
+```
+
+Then open: http://localhost:3000
+
+**Enjoy using DataFlow! 💪**
