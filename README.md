@@ -1,6 +1,6 @@
 # 🎯 DataFlow - Data Bundle Sales Platform
 
-A complete, production-ready data bundle e-commerce platform with Paystack payment integration, order management, and admin dashboard.
+A complete, production-ready data bundle e-commerce platform with Paystack payment integration, order management, and MongoDB cloud database.
 
 ```
 ┌────────────────────────────────────────────────┐
@@ -8,33 +8,45 @@ A complete, production-ready data bundle e-commerce platform with Paystack payme
 ├────────────────────────────────────────────────┤
 │ ✅ Paystack Payment Integration               │
 │ ✅ Express.js REST Backend                    │
-│ ✅ SQLite Database                            │
+│ ✅ MongoDB Atlas Cloud Database               │
 │ ✅ Orders Management Dashboard                │
 │ ✅ Real-time Order Tracking                   │
 │ ✅ Excel Export Functionality                 │
 │ ✅ Multi-Network Support                      │
 │ ✅ Responsive Mobile-Friendly Design          │
+│ ✅ Vercel Deployment Ready                    │
 └────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ Quick Start (3 Steps)
+## ⚡ Quick Start (5 Steps)
 
 ### 1️⃣ Install Dependencies
 ```bash
 npm install
 ```
 
-### 2️⃣ Start Server
+### 2️⃣ Set Up MongoDB
+- Create free MongoDB Atlas account: https://www.mongodb.com/cloud/atlas
+- Get your connection string
+- Add to `.env` file as `DATABASE_URL=...`
+- See **[MONGODB_SETUP.md](MONGODB_SETUP.md)** for detailed guide
+
+### 3️⃣ Start Server
 ```bash
 npm start
 ```
 
-### 3️⃣ Open in Browser
+### 4️⃣ Open in Browser
 - **Homepage:** http://localhost:3000
 - **Buy Data:** http://localhost:3000/buy.html
 - **View Orders:** http://localhost:3000/orders.html
+
+### 5️⃣ Deploy to Vercel
+- Set environment variable in Vercel dashboard
+- Deploy with `vercel` command
+- Live at your Vercel URL
 
 **That's it! 🎉**
 
@@ -44,6 +56,7 @@ npm start
 
 - **[QUICKSTART.md](QUICKSTART.md)** - 5-minute setup guide
 - **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
+- **[MONGODB_SETUP.md](MONGODB_SETUP.md)** - MongoDB Atlas configuration
 - **[FEATURES_OVERVIEW.md](FEATURES_OVERVIEW.md)** - Feature descriptions
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem solving
 - **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - System overview
@@ -60,8 +73,9 @@ data-bundle-website/
 ├── success.html                # Payment confirmation page
 ├── orders.html                 # Orders dashboard/viewer
 ├── package.json                # NPM dependencies
-├── database/
-│   └── orders.db              # SQLite database (auto-created)
+├── .env                        # MongoDB connection string (local only)
+├── .env.example                # Environment template
+├── vercel.json                 # Vercel deployment config
 ├── js/
 │   └── app.js                 # Main application logic
 ├── css/

@@ -26,18 +26,36 @@ cd C:\Users\ESLI\Desktop\Project\data-bundle-website
 npm install
 ```
 
-### Step 2: Start Server (10 seconds)
+### Step 2: Set Up MongoDB (2 minutes)
+
+**Quick Summary:**
+1. Create free account at https://www.mongodb.com/cloud/atlas
+2. Create M0 (Free) cluster
+3. Create database user
+4. Copy connection string
+5. Create `.env` file with connection string
+
+**Full guide:** See [MONGODB_SETUP.md](MONGODB_SETUP.md)
+
+Your `.env` should look like:
+```env
+DATABASE_URL=mongodb+srv://dataflow:password@cluster.mongodb.net/dataflow?retryWrites=true&w=majority
+PAYSTACK_PUBLIC_KEY=pk_live_YOUR_KEY_HERE
+```
+
+### Step 3: Start Server (10 seconds)
 ```bash
 npm start
 ```
 
 **You should see:**
 ```
+✓ Connected to MongoDB
 DataFlow Server Running
 Server running at: http://localhost:3000
 ```
 
-### Step 3: Open Websites (20 seconds)
+### Step 4: Open Websites (20 seconds)
 
 Visit these URLs:
 

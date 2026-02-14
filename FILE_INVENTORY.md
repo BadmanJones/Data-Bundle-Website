@@ -11,12 +11,12 @@ Complete list of all project files and their purposes.
 ✅ 2 JavaScript Files     - Application logic
 ✅ 2 CSS Files            - Styling & responsive design
 ✅ 1 Backend Server       - Express.js API
-✅ 1 Database File        - SQLite (auto-created)
-✅ Configuration Files    - package.json, .gitignore
-✅ 8 Documentation Files  - Comprehensive guides
+✅ 1 MongoDB Database     - Cloud storage (Atlas)
+✅ Configuration Files    - package.json, .gitignore, .env, vercel.json
+✅ 9 Documentation Files  - Comprehensive guides
 ✅ 1 Images Folder        - Assets
 
-Total: 23 Files - Complete e-commerce platform
+Total: 24 Files - Complete e-commerce platform with cloud database
 ```
 
 ---
@@ -138,34 +138,28 @@ Total: 23 Files - Complete e-commerce platform
 
 ---
 
-## 🖥️ Backend Files (Folder: Not tracked)
+## 🖥️ Backend Files
 
-### `server.js` (240 Lines, 8 KB) 
-- **Purpose:** Express.js backend server
+### `server.js` (270+ Lines, 10 KB)
+- **Purpose:** Express.js backend server with MongoDB
 - **Runs on:** http://localhost:3000
 - **Contains:**
   - Express server setup
-  - SQLite database connection
+  - MongoDB Atlas connection
   - CORS middleware
   - Body parser middleware
   - Order creation endpoint (POST /api/orders)
   - Order fetching endpoint (GET /api/orders)
   - Excel export endpoint (GET /api/orders/export/excel)
-  - Database table initialization
+  - Configuration endpoint (GET /api/config)
+  - Health check endpoint (GET /api/health)
   - Error handling
-- **Depends on:** sqlite3, express, cors, body-parser
-
-### `database/orders.db` (Auto-created)
-- **Purpose:** SQLite database
-- **Created:** On first npm start
-- **Stored in:** database/ folder
-- **Contains:** orders table with all customer orders
-- **Size:** Grows with data (starts ~24 KB)
-- **Persistence:** Survives server restarts
+  - Graceful shutdown
+- **Depends on:** mongodb, express, cors, body-parser, dotenv
 
 ---
 
-## ⚙️ Configuration Files (2 Files)
+## ⚙️ Configuration Files
 
 ### `package.json` (1.5 KB)
 - **Purpose:** Node.js project configuration
@@ -174,22 +168,36 @@ Total: 23 Files - Complete e-commerce platform
   - Main file (server.js)
   - Dependencies list:
     - express
-    - sqlite3
+    - mongodb
     - cors
     - body-parser
+    - dotenv
   - Scripts:
     - `npm start` - Start server
     - `npm run dev` - Dev mode
 - **Used by:** npm, Node.js
 
-### `.env` (Optional)
-- **Purpose:** Environment variables
+### `.env` (Template provided in .env.example)
+- **Purpose:** Environment variables (LOCAL ONLY)
 - **Contains:**
   - PORT=3000
-  - NODE_ENV=production
-  - Database path
-- **Security:** Not tracked by Git (.gitignore)
-- **Optional:** Can be created if needed
+  - NODE_ENV=development
+  - DATABASE_URL=mongodb+srv://...
+  - PAYSTACK_PUBLIC_KEY=pk_live_...
+- **Security:** Not tracked by Git (.gitignore) ✅
+- **Required:** Must be created with your MongoDB connection string
+
+### `.env.example` (Template)
+- **Purpose:** Template showing required environment variables
+- **Contains:** Example format for all required variables
+- **Used by:** New developers setting up locally
+- **You copy this:** Rename to `.env` and fill in your values
+
+### `vercel.json` (JSON)
+- **Purpose:** Vercel deployment configuration
+- **Contains:** Build configuration, routes, environment variable references
+- **Used by:** Vercel to deploy your app
+- **Deployment:** Automatically used when deploying to Vercel
 
 ---
 

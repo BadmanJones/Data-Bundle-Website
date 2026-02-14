@@ -43,13 +43,67 @@ npm install
 
 This installs:
 - `express` - Web server framework
-- `sqlite3` - Database
+- `mongodb` - Database driver for MongoDB Atlas
 - `cors` - Cross-origin support
 - `body-parser` - JSON parsing
+- `dotenv` - Environment variable management
 
 **Output should show:** "added X packages in Y seconds"
 
-### Step 3: Start the Server
+### Step 3: Set Up MongoDB Database
+
+#### A. Create MongoDB Atlas Account
+
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Click **Sign Up** and create your account
+3. Verify your email
+4. Log in to your MongoDB dashboard
+
+#### B. Create a Free Cluster
+
+1. Click **Create Deployment**
+2. Select **M0 (Shared)** - FREE forever
+3. Choose your region and provider
+4. Click **Create Deployment** (takes 2-5 minutes)
+
+#### C. Create Database User
+
+1. In sidebar, click **Database Access**
+2. Click **Add New Database User**
+3. Set:
+   - Username: `dataflow` (or your choice)
+   - Password: Create a strong password and **COPY IT**
+   - Database Privileges: Read and write to any database
+4. Click **Add User**
+
+#### D. Get Connection String
+
+1. Go to **Clusters** in sidebar
+2. Click **Connect** on your cluster
+3. Click **Drivers**
+4. Select **Node.js**
+5. Copy your connection string
+6. **Replace `<password>` with your actual password**
+
+Example:
+```
+mongodb+srv://dataflow:YourPassword@cluster.mongodb.net/dataflow?retryWrites=true&w=majority
+```
+
+#### E. Add to .env File
+
+Create a `.env` file in your project root:
+
+```env
+PORT=3000
+NODE_ENV=development
+PAYSTACK_PUBLIC_KEY=pk_live_YOUR_KEY_HERE
+DATABASE_URL=mongodb+srv://dataflow:YourPassword@cluster.mongodb.net/dataflow?retryWrites=true&w=majority
+```
+
+⚠️ **IMPORTANT:** Do NOT commit `.env` to Git (it's in .gitignore)
+
+### Step 4: Start the Server
 
 Launch the backend server:
 
@@ -59,14 +113,14 @@ npm start
 
 **Expected output:**
 ```
-========================================
-DataFlow Server Running
-========================================
+✓ Connected to MongoDB
+✓ Using database: dataflow
+✓ Using collection: orders
+DataFlow Order Management System v2.0.0
 Server running at: http://localhost:3000
-========================================
 ```
 
-### Step 4: Open in Browser
+### Step 5: Open in Browser
 
 Visit these URLs:
 
@@ -74,7 +128,7 @@ Visit these URLs:
 - **Buy Data:** http://localhost:3000/buy.html
 - **View Orders:** http://localhost:3000/orders.html
 
-**You're done!** The platform is running. 🎉
+**You're done!** The platform is running with MongoDB. 🎉
 
 ---
 

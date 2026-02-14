@@ -27,9 +27,10 @@ DataFlow is a **complete, production-ready e-commerce platform** for selling dat
 4. **Admin Dashboard** (`orders.html`) - View and manage all orders
 
 ### Backend
-- **Server** (`server.js`) - Express.js REST API
-- **Database** (`database/orders.db`) - SQLite with auto-creation
-- **Dependencies** - All properly configured in package.json
+- **Server** (`server.js`) - Express.js REST API with async/await support
+- **Database** (`MongoDB Atlas`) - Cloud-hosted NoSQL database with auto-scaling
+- **Environment** (`.env`) - Secure configuration management
+- **Dependencies** - All properly configured in package.json with MongoDB driver
 
 ### Styling & Logic
 - **Main CSS** (`css/style.css`) - Website styling
@@ -65,10 +66,10 @@ DataFlow is a **complete, production-ready e-commerce platform** for selling dat
 │  ├─ CORS middleware                               │
 │  └─ Error handling                               │
 │                                                      │
-│  DATA LAYER (Storage)                              │
-│  ├─ SQLite Database                               │
-│  ├─ orders table                                  │
-│  └─ Automatic management                          │
+│  DATA LAYER (Cloud Storage)                        │
+│  ├─ MongoDB Atlas Database                       │
+│  ├─ orders collection                            │
+│  └─ Automatic cloud management                   │
 │                                                      │
 │  ADMIN LAYER (Dashboard)                           │
 │  ├─ orders.html (Admin panel)                     │
