@@ -1,391 +1,424 @@
-# 🔧 Troubleshooting Guide - DataFlow Admin Backend
+# 🔧 Troubleshooting Guide - DataFlow Platform
 
-## Common Issues & Solutions
+Complete guide to solving common issues.
 
-### 1. Server Won't Start
+---
 
-#### Error: `Command not found: npm`
+## 🚀 Server Issues
+
+### Issue: "npm: The term 'npm' is not recognized"
+
 **Problem:** Node.js not installed
-**Solution:**
-1. Download Node.js from https://nodejs.org/
-2. Install the LTS version
-3. Restart your terminal/PowerShell
-4. Run `node --version` to verify
 
-#### Error: `Port 3000 already in use`
-**Problem:** Another application using port 3000
 **Solution:**
-Option 1: Kill process using port 3000
+1. Download Node.js: https://nodejs.org/
+2. Install the LTS version
+3. Restart PowerShell/terminal
+4. Verify: `node --version` (should show version)
+
+---
+
+### Issue: "Port 3000 already in use"
+
+**Problem:** Another application using port 3000
+
+**Solution Option 1:** Kill the process
 ```bash
-# Windows - Find and stop process on port 3000
 netstat -ano | findstr :3000
 taskkill /PID <PID> /F
-```
-
-Option 2: Use different port
-Edit `server.js`:
-```javascript
-const PORT = process.env.PORT || 5000; // Change to 5000
-```
-
-Then start:
-```bash
 npm start
 ```
 
-#### Error: `Cannot find module 'express'`
+**Solution Option 2:** Use different port
+Edit `server.js` line 15:
+```javascript
+const PORT = process.env.PORT || 5000; // Change 3000 to 5000
+```
+
+Then: `npm start`
+
+---
+
+### Issue: "Cannot find module 'express'"
+
 **Problem:** Dependencies not installed
+
 **Solution:**
 ```bash
 npm install
-```
-
-Then start:
-```bash
 npm start
 ```
 
 ---
 
-### 2. Can't Login to Admin Panel
+### Issue: Server starts but won't respond
 
-#### Error: `Invalid username or password`
-**Problem:** Wrong credentials
-**Solution:**
-- Username: `admin` (lowercase)
-- Password: `admin123`
-- Make sure CAPS LOCK is off
-- Clear browser cookies
+**Problem:** CORS or middleware issue
 
-#### Error: `Access denied. No token provided`
-**Problem:** Authentication issue
 **Solution:**
-1. Check if server is running
-2. Clear browser cache (Ctrl+Shift+Delete)
-3. Try incognito/private window
-4. Check browser console (F12) for errors
-
-#### Connection Error: `Cannot reach server`
-**Problem:** Server not running
-**Solution:**
-1. Check terminal - is server running?
-2. Visit `http://localhost:3000/api/health`
-3. Should show: `{"status":"Server is running"}`
-4. If not, start server: `npm start`
+1. Stop server: `Ctrl+C`
+2. Clear: `npm install`
+3. Restart: `npm start`
+4. Check console for error messages
 
 ---
 
-### 3. Orders Not Appearing in Dashboard
+## 📱 Payment Issues
 
-#### Issue: Dashboard shows "No orders"
-**Problem:** Integration not completed
-**Solution:**
+### Issue: "Paystack modal won't open"
 
-1. Verify integration code is in app.js:
-   ```javascript
-   sendOrderToAdminBackend(orderData);
-   ```
+**Problem:** Payment script not loading
 
-2. Check Network tab (F12 → Network):
-   - Place a test order
-   - Look for POST to `localhost:3000/api/orders`
-   - Check response (should be 201 with success)
+**Solutions:**
+1. Hard refresh: `Ctrl+Shift+R`
+2. Check F12 console for errors
+3. Verify Paystack key is correct in `js/app.js` line 66
+4. Check network connection
 
-3. Check server console for errors:
-   ```
-   Look for error messages when order is sent
-   ```
+---
 
-#### Issue: Orders saved to Airtable but not backend
-**Problem:** Backend integration incomplete
-**Solution:**
-1. Ensure `sendOrderToAdminBackend()` function exists
-2. Verify it's called after payment success
-3. Check if API endpoint is working: 
+### Issue: "Payment completed but page didn't redirect"
+
+**Problem:** Paystack callback issue
+
+**Solutions:**
+1. Wait 30 seconds - system tries fallback method
+2. Try payment again
+3. Refresh page manually
+4. Check browser console (F12) for JavaScript errors
+
+---
+
+### Issue: "Paystack payment failed"
+
+**Problem:** Payment declined or issue with Paystack
+
+**Solutions:**
+1. Try a different amount
+2. Try a different payment method
+3. Check with customer's bank/mobile provider
+4. Verify Paystack account is in good standing
+5. Check Paystack dashboard for declined reason
+
+---
+
+## 📊 Order Issues
+
+### Issue: "Orders not saving to database"
+
+**Problem:** Backend API not receiving data
+
+**Solutions:**
+1. **Check payment completed:**
+   - Ensure payment was confirmed by Paystack
+   - Look for "PAYMENT SUCCESS" in browser console
+   
+2. **Check backend is running:**
+   - Terminal should show "Server running at..."
+   - Try: http://localhost:3000/api/orders in browser
+
+3. **Check server console for errors:**
+   - Look for red error messages
+   - Check database folder exists
+
+4. **Verify data format:**
+   - Check F12 Network tab
+   - Look for POST to /api/orders
+   - Check response status (should be 201)
+
+---
+
+### Issue: "Orders page shows 'No Orders Yet'"
+
+**Problem:** One of several possible causes
+
+**Solutions:**
+
+1. **Hard refresh the page:**
    ```bash
-   # Test with Postman or curl
-   curl -X POST http://localhost:3000/api/orders \
-     -H "Content-Type: application/json" \
-     -d "{\"transaction_id\":\"TEST-123\", ...}"
+   Ctrl+Shift+R
    ```
 
----
+2. **Check if server is running:**
+   - Terminal should show "Server running"
+   - Try `npm start` if stopped
 
-### 4. Dashboard is Slow/Frozen
+3. **Check database:**
+   - Verify `database/orders.db` exists
+   - Should be in project root
 
-#### Issue: Page takes too long to load
-**Problem:** Large number of orders
-**Solution:**
-1. Clear browser cache
-2. Check Network tab for slow requests
-3. Restart server
+4. **Test API directly:**
+   - Visit: http://localhost:3000/api/orders
+   - Should show JSON with orders array
+   - If blank: No orders yet (expected on first setup)
 
-#### Issue: Searching/Filtering is slow
-**Problem:** Large dataset
-**Solution:**
-1. Filter by specific network or status first
-2. Use more specific search terms
-3. Consider migrating to PostgreSQL for 100k+ orders
-
----
-
-### 5. Can't Logout or Session Issues
-
-#### Issue: Logout button doesn't work
-**Problem:** Browser cache issue
-**Solution:**
-1. Clear browser cookies and cache
-2. Try incognito window
-3. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
-
-#### Issue: Keep getting logged out
-**Problem:** Token expiration (24 hours)
-**Solution:**
-- This is normal behavior
-- Just login again
-- Token automatically refreshes on page reload
+5. **Check for JavaScript errors:**
+   - Press F12 in browser
+   - Click "Console" tab
+   - Look for red error messages
+   - Fix errors shown
 
 ---
 
-### 6. Database Issues
+### Issue: "Can see single orders but table is empty"
 
-#### Issue: `database/orders.db` not created
-**Problem:** Directory doesn't exist
-**Solution:**
-The server creates it automatically, but if not:
-1. Manually create folder: `database`
-2. Restart server: `npm start`
+**Problem:** Date formatting issue
 
-#### Issue: Database file is too large
-**Problem:** Too many orders
-**Solution:**
-1. Archive old orders to CSV
-2. Backup current database
-3. Consider PostgreSQL migration
-
-#### Issue: Database appears corrupted
-**Problem:** Unexpected shutdown
-**Solution:**
-1. Check if file exists: `database/orders.db`
-2. Try deleting and restarting (warning: loses data)
-3. Restore from backup if available
+**Solutions:**
+1. Hard refresh: `Ctrl+Shift+R`
+2. Check browser console (F12) for errors
+3. Check server console for database errors
+4. Verify orders.html is up to date
 
 ---
 
-### 7. Payment Integration Issues
+## 🔍 Dashboard Issues
 
-#### Issue: Order shows "pending" instead of "completed"
-**Problem:** Status not set correctly
+### Issue: "Orders dashboard loads but no data"
+
+**Solutions:**
+1. Check if orders exist: http://localhost:3000/api/orders
+2. Click "Refresh" button manually
+3. Hard refresh page: `Ctrl+Shift+R`
+4. Check F12 console for errors
+5. Restart server: `npm start`
+
+---
+
+### Issue: "Dashboard statistics show wrong numbers"
+
+**Problem:** Cache issue
+
+**Solutions:**
+1. Click "Refresh" button
+2. Hard refresh page: `Ctrl+Shift+R`
+3. Wait for auto-refresh (30 seconds)
+4. Close and reopen browser tab
+
+---
+
+### Issue: "Excel download not working"
+
+**Problem:** Export endpoint issue
+
+**Solutions:**
+1. Check server is running
+2. Try from orders.html directly
+3. Check browser console (F12) for errors
+4. Verify download permission in browser
+5. Try different browser
+
+---
+
+## 💾 Database Issues
+
+### Issue: "Database file .gitignore showing"
+
+**Problem:** Normal - database excluded from Git
+
 **Solution:**
-```javascript
-// Make sure status is 'completed' after payment success
-const payload = {
-    ...
-    status: 'completed'  // Add this line
-};
-```
-
-#### Issue: Missing Paystack reference
-**Problem:** Optional field not included
-**Solution:**
-```javascript
-paystack_reference: response.reference || ''  // Add fallback
-```
+- This is correct - database files shouldn't be tracked
+- Each install creates fresh database
+- No action needed
 
 ---
 
-### 8. CORS/Connection Errors
+### Issue: "Orders disappeared after restart"
 
-#### Error: `CORS policy: Cross-origin request blocked`
-**Problem:** Frontend and backend on different origins
-**Solution:**
-1. Ensure both run on `localhost:3000`
-2. Or update CORS in server.js:
-   ```javascript
-   app.use(cors({
-       origin: 'http://yourdomain.com'
-   }));
-   ```
+**Problem:** Database file deleted/moved
 
-#### Error: `Failed to fetch`
-**Problem:** Network connectivity
-**Solution:**
-1. Check if server is running
-2. Verify correct URL: `http://localhost:3000`
-3. Check firewall settings
+**Solutions:**
+1. Check `database/orders.db` exists
+2. If missing: Run `npm start` to recreate (empty)
+3. Previous orders may need manual backup
+4. Consider backing up database regularly
 
 ---
 
-### 9. CSS/Styling Issues
+## 🔐 Security Issues
 
-#### Dashboard looks broken/unstyled
-**Problem:** CSS file not loading
-**Solution:**
-1. Check browser console (F12) for 404 errors
-2. Verify file exists: `css/admin-style.css`
-3. Hard refresh: Ctrl+Shift+R
-4. Clear browser cache
+### Issue: "I see Paystack test key in code"
 
-#### Responsive design not working
-**Problem:** Viewport meta tag missing
-**Solution:**
-Admin.html already has correct meta tags, no action needed
+**Problem:** Test vs Live key
+
+**Solutions:**
+- Test key: For development/testing
+- Live key: For production (already configured)
+- Safe to share test key
+- Never share live secret key
+- Check `js/app.js` line 66 for current key
 
 ---
 
-### 10. Performance Issues
+## 🌐 Browser Issues
 
-#### Slow search/filtering
-**Problem:** Inefficient queries
-**Solution:**
-1. Upgrade database to PostgreSQL
-2. Add indexes to frequently searched columns
-3. Implement pagination (already done)
+### Issue: "Page looks broken/CSS not loading"
 
-#### High memory usage
-**Problem:** Too many operations
-**Solution:**
-1. Restart server: `npm start`
-2. Close other applications
-3. Check Windows Task Manager for processes
+**Solutions:**
+1. Hard refresh: `Ctrl+Shift+R`
+2. Clear browser cache
+3. Try different browser
+4. Check F12 console for CSS/404 errors
 
 ---
 
-## Debugging Checklist
+### Issue: "Form won't submit / buttons unresponsive"
 
-### Step 1: Check Server Status
-```bash
-# Is server running?
-Visit: http://localhost:3000/api/health
-Should see: {"status":"Server is running"}
-```
-
-### Step 2: Check Browser Console
-Press F12, look for JavaScript errors:
-- Red errors = Problems to fix
-- Yellow warnings = Usually OK
-- Check Network tab for failed requests
-
-### Step 3: Check Server Logs
-Look at terminal/PowerShell window where you ran `npm start`:
-- Error messages will appear here
-- Database operations logged
-- Authentication attempts logged
-
-### Step 4: Test Endpoints
-Use a tool like Postman:
-```
-POST http://localhost:3000/api/admin/login
-Headers: Content-Type: application/json
-Body: {"username":"admin","password":"admin123"}
-```
-
-### Step 5: Check Database
-Database file at: `database/orders.db`
-- File should exist and be > 100KB
-- Use SQLite viewer to inspect (optional)
+**Solutions:**
+1. Check browser console: F12 → Console
+2. Verify JavaScript loaded (should show no errors)
+3. Hard refresh: `Ctrl+Shift+R`
+4. Try private/incognito window
+5. Try different browser
 
 ---
 
-## Getting More Help
+### Issue: "Mobile version looks broken"
 
-### Check These Files
-1. **ADMIN_README.md** - Complete documentation
-2. **SETUP_GUIDE.md** - Detailed setup steps
-3. **FEATURES_OVERVIEW.md** - Feature descriptions
-4. **QUICKSTART.md** - Quick start guide
-
-### Browser Tools
-- **F12** - Developer tools
-  - Console - Error messages
-  - Network - API calls
-  - Storage - Cookies/tokens
-  
-### Server Logs
-- Look at terminal where server is running
-- Error messages show what went wrong
-- Sometimes includes database errors
-
-### Common Error Messages
-
-| Error | Meaning | Fix |
-|-------|---------|-----|
-| `Cannot find module` | Missing package | `npm install` |
-| `EADDRINUSE` | Port in use | Change port or kill process |
-| `401 Unauthorized` | Bad token | Login again |
-| `403 Forbidden` | No permission | Check auth |
-| `404 Not Found` | Wrong URL | Check endpoint |
-| `500 Internal Error` | Server error | Check server logs |
-| `CORS error` | Cross-origin issue | Update CORS settings |
+**Solutions:**
+1. Open on real mobile device (not just resize)
+2. Hard refresh: Swipe down or reload
+3. Zoom to 100%
+4. Try different mobile browser
+5. Check browser console for errors
 
 ---
 
-## Emergency Solutions
+## 📊 API Issues
 
-### Reset Everything
-If something is really broken:
-```bash
-# Delete everything and start fresh
-rm -r node_modules
-rm -r database
-npm install
-npm start
-```
+### Issue: "API endpoint returns 404"
 
-### Backup Data Before Reset
-```bash
-# Save your database first
-Copy database/orders.db to safe location
-```
+**Problem:** Server not running or wrong path
 
-### Factory Reset Database
-```bash
-# Delete database
-rm database/orders.db
-# Restart server - creates fresh database
-npm start
-```
+**Solutions:**
+1. Verify server running: `npm start`
+2. Check correct URL: http://localhost:3000/api/orders
+3. Try in browser first to test endpoint
+4. Check server console for hints
 
 ---
 
-## Performance Tips
+### Issue: "API returns error 500"
 
-### For Better Performance
+**Problem:** Server error
 
-1. **Reduce Data Load**
-   - Filter before searching
-   - Use pagination
-
-2. **Clear Cache**
-   - Ctrl+Shift+Delete
-   - Try incognito window
-
-3. **Optimize Database**
-   - Archive old orders
-   - Delete test data
-
-4. **Server Resources**
-   - Close unnecessary apps
-   - Restart computer periodically
+**Solutions:**
+1. Check server console for error details
+2. Look for database connection errors
+3. Check request format in F12 Network tab
+4. Restart server: `Ctrl+C` then `npm start`
 
 ---
 
-## When to Seek Help
+## 🔄 Integration Issues
 
-🆘 **Seek help if:**
-- Server crashes repeatedly
-- Database corrupted
-- Can't restore from errors
-- Significant data loss
+### Issue: "Can't integrate with buy.html"
 
-📞 **Resources:**
-- Stack Overflow - General programming
-- Express.js docs - Server issues
-- SQLite docs - Database issues
-- Node.js docs - Runtime issues
+**Solutions:**
+1. Read [SETUP_GUIDE.md](SETUP_GUIDE.md) integration section
+2. Ensure `sendOrderToAdminBackend()` function exists in app.js
+3. Call function after successful payment
+4. Check browser console for errors during call
+5. Verify server is running
 
 ---
 
-**Remember:** Most issues have simple solutions. Check the browser console and server logs first! 🔍
+## 🎯 Testing Issues
 
-For questions not covered here, refer to the main documentation files.
+### Issue: "Test payment won't go through"
+
+**Problem:** Paystack test details
+
+**Solutions:**
+1. Verify payment details entered correctly:
+   - Network: MTN/Telecel/AirtelTigo
+   - Bundle: Valid size
+   - Phone: Valid format (0201234567)
+   - Name: Any text
+   - Email: Valid format
+
+2. Check payment method works
+3. Try with test credentials from Paystack
+4. Check Paystack account has test mode enabled
+5. Contact Paystack for test account issues
+
+---
+
+## 🆘 Still Having Issues?
+
+### Debug Steps:
+
+1. **Check Server Console:**
+   - Stop with `Ctrl+C`
+   - Run: `npm start`
+   - Look for any error messages
+   - File names and line numbers help
+
+2. **Check Browser Console (F12):**
+   - Click "Console" tab
+   - Red messages = errors
+   - Yellow messages = warnings
+   - Look for specific error names
+
+3. **Check Network Tab (F12):**
+   - Click "Network" tab
+   - Perform action
+   - Look for failed requests (red)
+   - Check response details
+
+4. **Check Files:**
+   - Verify files exist
+   - Check file names for typos
+   - Confirm latest changes saved
+   - Clear IDE cache if needed
+
+5. **Try Fresh Start:**
+   - Stop server: `Ctrl+C`
+   - Delete: `database/orders.db`
+   - Run: `npm install`
+   - Run: `npm start`
+   - Try again
+
+---
+
+## 📞 Common Error Messages
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| "fetch failed" | Network/CORS issue | Check server running |
+| "undefined function" | Missing app.js | Hard refresh (Ctrl+Shift+R) |
+| "Cannot POST /api/orders" | Typo in URL | Check exact endpoint |
+| "EADDRINUSE" | Port in use | Kill process or change port |
+| "ENOENT: no such file" | Missing file | Verify file path and name |
+| "Database locked" | Multiple access | Restart server |
+
+---
+
+## ✅ Verification Checklist
+
+Before declaring it broken:
+
+- [ ] Server running? `npm start` visible in terminal
+- [ ] Correct URL? http://localhost:3000/buy.html
+- [ ] Hard refreshed? `Ctrl+Shift+R`
+- [ ] Checked F12 console? Any red errors?
+- [ ] Checked server console? Any error messages?
+- [ ] File saved? Current changes applied?
+- [ ] Wait 30 seconds? Auto-updates sometimes delayed
+- [ ] Tried different browser? Safari/Firefox/Chrome?
+
+---
+
+## 🚀 Quick Fixes (Try These First)
+
+1. **Hard Refresh:** `Ctrl+Shift+R`
+2. **Restart Server:** `Ctrl+C` then `npm start`
+3. **Check Running:** Visit http://localhost:3000
+4. **Clear Cache:** Open F12 → Settings → Cache
+5. **Reinstall:** `npm install`
+
+---
+
+**Most issues solved by hard refresh or restarting server!** 🔄
+
+If stuck, check the browser console (F12) - it usually shows the actual problem.
