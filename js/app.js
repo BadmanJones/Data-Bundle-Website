@@ -62,36 +62,14 @@ const NETWORKS = {
    PAYSTACK CONFIGURATION
    ============================================ */
 
-// Replace this with your actual Paystack public key
-const PAYSTACK_PUBLIC_KEY = 'REDACTED'; // Live key
+// Paystack public key is loaded from server /api/config endpoint
+// DO NOT hardcode keys in this file - keys are stored in .env (local only)
+let PAYSTACK_PUBLIC_KEY = '';
 const PAYSTACK_EMAIL_FOR_TESTING = 'test@example.com'; // For testing purposes
 
 // Check if Paystack key is configured
 function isPaystackConfigured() {
-    return PAYSTACK_PUBLIC_KEY && PAYSTACK_PUBLIC_KEY !== 'pk_test_your_public_key_here';
-}
-
-/**
- * Test function to verify success page works
- */
-function testSuccessPage() {
-    const testData = {
-        txnId: 'TEST-' + Date.now(),
-        paystackReference: 'TEST-REF-' + Date.now(),
-        network: 'MTN',
-        bundle: '2GB',
-        phone: '0201234567',
-        amount: 10.99,
-        fullName: 'Test User',
-        email: 'test@example.com',
-        dateTime: new Date().toLocaleString(),
-        status: 'success'
-    };
-    
-    console.log('Setting test data in session storage:', testData);
-    sessionStorage.setItem('transactionData', JSON.stringify(testData));
-    console.log('Redirecting to success.html...');
-    window.location.href = 'success.html';
+    return PAYSTACK_PUBLIC_KEY && PAYSTACK_PUBLIC_KEY !== '';
 }
 
 /* ============================================
@@ -103,9 +81,6 @@ function testSuccessPage() {
  * Send order data to Admin Backend Database
  */
 function sendOrderToAdminBackend(orderData) {
-    console.log('=== sendOrderToAdminBackend called ===');
-    console.log('Order data received:', orderData);
-    
     const backendUrl = 'http://localhost:3000/api/orders';
     
     const payload = {
@@ -121,7 +96,7 @@ function sendOrderToAdminBackend(orderData) {
         status: 'completed'
     };
     
-    console.log('Prepared payload for backend:', payload);
+    console.log('Sending order to backend:', payload);
     
     fetch(backendUrl, {
         method: 'POST',
@@ -524,44 +499,18 @@ function handleFormSubmit(event) {
     // Initialize Paystack payment
     const handler = PaystackPop.setup({
         key: PAYSTACK_PUBLIC_KEY,
-        email: email || PAYSTACK_EMAIL_FOR_TESTING,
+        email: email,
         amount: amountInPesewas,
         currency: 'GHS',
         ref: generateTransactionID(),
-        metadata: {
-            custom_fields: [
-                {
-                    display_name: "Phone Number",
-                    variable_name: "phone_number",
-                    value: phoneNumber
-                },
-                {
-                    display_name: "Network",
-                    variable_name: "network",
-                    value: NETWORKS[selectedNetwork].name
-                },
-                {
-                    display_name: "Bundle",
-                    variable_name: "bundle",
-                    value: bundle.name
-                }
-            ]
-        },
         onClose: function() {
-            console.log('=== PAYSTACK MODAL CLOSED ===');
             payButton.classList.remove('loading');
             showToast('Payment window closed', 'error');
         },
         onSuccess: function(response) {
             // Payment successful
-            console.log('=== PAYMENT SUCCESS CALLBACK TRIGGERED ===');
+            console.log('=== PAYMENT SUCCESS ===');
             console.log('Response:', response);
-            
-            // Clear the fallback timeout since callback actually fired
-            if (window.paymentTimeoutId) {
-                clearTimeout(window.paymentTimeoutId);
-                console.log('Cleared fallback timeout');
-            }
             
             const transactionData = {
                 txnId: response.reference,
@@ -578,66 +527,32 @@ function handleFormSubmit(event) {
 
             console.log('Transaction data:', transactionData);
 
+            // Send order to Admin Backend
+            console.log('Calling sendOrderToAdminBackend...');
+            sendOrderToAdminBackend(transactionData);
+            
+            // Export order to Excel file (with delay to ensure POST completes)
+            console.log('Calling exportOrderToExcel...');
+            setTimeout(() => {
+                exportOrderToExcel(transactionData);
+            }, 500);
+
             // Store in session storage for success page
             sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
-            console.log('Stored in session storage');
 
             payButton.classList.remove('loading');
             showToast('Payment successful! Redirecting...', 'success');
 
-            // Redirect to success page (order will be sent from success.html)
+            // Redirect to success page (with longer delay to ensure requests complete)
             setTimeout(() => {
                 window.location.href = 'success.html';
-            }, 1500);
+            }, 3000);
         }
     });
 
     // Open Paystack payment modal
-    console.log('Opening Paystack payment modal with key:', PAYSTACK_PUBLIC_KEY);
     handler.openIframe();
-
-    // WORKAROUND: Fallback redirect after 30 seconds if onSuccess callback doesn't fire
-    // This handles cases where Paystack callbacks are unreliable
-    const timeoutId = setTimeout(() => {
-        console.log('30-second timeout triggered - checking if still loading');
-        if (payButton && payButton.classList.contains('loading')) {
-            console.log('Modal still open and loading, forcing redirect as fallback');
-            const transactionData = {
-                txnId: 'TXN-' + Date.now(),
-                paystackReference: 'REF-' + Date.now(),
-                network: NETWORKS[selectedNetwork].name,
-                bundle: bundle.name,
-                phone: phoneNumber,
-                amount: bundle.price,
-                fullName: fullName,
-                email: email,
-                dateTime: getCurrentDateTime(),
-                status: 'pending_verification'
-            };
-            
-            console.log('Fallback transaction data:', transactionData);
-            sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
-            payButton.classList.remove('loading');
-            showToast('Payment processing...', 'success');
-            
-            // DO NOT send to backend - only send if Paystack confirms payment
-            
-            setTimeout(() => {
-                window.location.href = 'success.html';
-            }, 1000);
-        }
-    }, 30000);
-
-    // Store timeout ID so we can clear it if onSuccess fires
-    window.paymentTimeoutId = timeoutId;
 }
-
-/* ============================================
-   PAYMENT PROCESSING
-   ============================================ */
-
-// Payment is now handled by Paystack's redirect parameter
-// Success page checks for reference in URL
 
 /* ============================================
    SUCCESS PAGE LOGIC
@@ -647,65 +562,26 @@ function handleFormSubmit(event) {
  * Populate success page with transaction data
  */
 function populateSuccessPage() {
-    console.log('populateSuccessPage() called');
-    const transactionDataStr = sessionStorage.getItem('transactionData');
-    console.log('Transaction data from session storage:', transactionDataStr);
-    
-    if (!transactionDataStr) {
-        console.warn('No transaction data found in session storage');
+    if (!sessionStorage.getItem('transactionData')) {
         return;
     }
 
-    try {
-        const transactionData = JSON.parse(transactionDataStr);
-        console.log('Parsed transaction data:', transactionData);
+    const transactionData = JSON.parse(sessionStorage.getItem('transactionData'));
 
-        // Populate elements
-        const txnIdElement = document.getElementById('txnId');
-        const detailNetworkElement = document.getElementById('detailNetwork');
-        const detailBundleElement = document.getElementById('detailBundle');
-        const detailPhoneElement = document.getElementById('detailPhone');
-        const detailAmountElement = document.getElementById('detailAmount');
-        const detailDateElement = document.getElementById('detailDate');
+    // Populate elements
+    const txnIdElement = document.getElementById('txnId');
+    const detailNetworkElement = document.getElementById('detailNetwork');
+    const detailBundleElement = document.getElementById('detailBundle');
+    const detailPhoneElement = document.getElementById('detailPhone');
+    const detailAmountElement = document.getElementById('detailAmount');
+    const detailDateElement = document.getElementById('detailDate');
 
-        console.log('Found elements:', {
-            txnId: !!txnIdElement,
-            network: !!detailNetworkElement,
-            bundle: !!detailBundleElement,
-            phone: !!detailPhoneElement,
-            amount: !!detailAmountElement,
-            date: !!detailDateElement
-        });
-
-        if (txnIdElement) {
-            txnIdElement.textContent = transactionData.txnId;
-            console.log('Updated txnId to:', transactionData.txnId);
-        }
-        if (detailNetworkElement) {
-            detailNetworkElement.textContent = transactionData.network;
-            console.log('Updated network to:', transactionData.network);
-        }
-        if (detailBundleElement) {
-            detailBundleElement.textContent = transactionData.bundle;
-            console.log('Updated bundle to:', transactionData.bundle);
-        }
-        if (detailPhoneElement) {
-            detailPhoneElement.textContent = transactionData.phone;
-            console.log('Updated phone to:', transactionData.phone);
-        }
-        if (detailAmountElement) {
-            detailAmountElement.textContent = formatCurrency(transactionData.amount);
-            console.log('Updated amount to:', formatCurrency(transactionData.amount));
-        }
-        if (detailDateElement) {
-            detailDateElement.textContent = transactionData.dateTime;
-            console.log('Updated date to:', transactionData.dateTime);
-        }
-        
-        console.log('Success page population completed');
-    } catch (error) {
-        console.error('Error populating success page:', error);
-    }
+    if (txnIdElement) txnIdElement.textContent = transactionData.txnId;
+    if (detailNetworkElement) detailNetworkElement.textContent = transactionData.network;
+    if (detailBundleElement) detailBundleElement.textContent = transactionData.bundle;
+    if (detailPhoneElement) detailPhoneElement.textContent = transactionData.phone;
+    if (detailAmountElement) detailAmountElement.textContent = formatCurrency(transactionData.amount);
+    if (detailDateElement) detailDateElement.textContent = transactionData.dateTime;
 }
 
 /* ============================================
@@ -765,6 +641,21 @@ if (purchaseForm) {
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load Paystack public key from server environment
+    fetch('/api/config')
+        .then(response => response.json())
+        .then(data => {
+            if (data.paystackKey) {
+                PAYSTACK_PUBLIC_KEY = data.paystackKey;
+                console.log('✓ Paystack configuration loaded from server');
+            } else {
+                console.warn('⚠️ Paystack key not configured');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Failed to load configuration:', error);
+        });
+
     // Check if we're on the success page
     if (document.querySelector('.success-section')) {
         populateSuccessPage();

@@ -236,4 +236,14 @@ app.listen(PORT, () => {
     `);
 });
 
+// API endpoint to serve configuration (like Paystack key)
+// The key comes from environment variable .env
+app.get('/api/config', (req, res) => {
+    const paystackKey = process.env.PAYSTACK_PUBLIC_KEY || '';
+    if (!paystackKey) {
+        console.warn('⚠️ Warning: PAYSTACK_PUBLIC_KEY not found in environment variables. Set it in .env file.');
+    }
+    res.json({ paystackKey });
+});
+
 module.exports = app;
