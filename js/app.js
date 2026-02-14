@@ -654,6 +654,12 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('❌ Failed to load configuration:', error);
+        })
+        .finally(() => {
+            // Initialize form AFTER key is loaded
+            if (purchaseForm) {
+                validateForm();
+            }
         });
 
     // Check if we're on the success page
@@ -663,11 +669,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize slideshow
     initializeSlideshow();
-
-    // Initialize form validation on buy page
-    if (purchaseForm) {
-        validateForm();
-    }
 
     // Log app initialization
     console.log('[DataFlow] Application initialized successfully');

@@ -3,6 +3,8 @@
  * Simple backend to save orders to database and export to Excel
  */
 
+require('dotenv').config(); // Load environment variables from .env file
+
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
