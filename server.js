@@ -245,13 +245,25 @@ app.get('/api/info', (req, res) => {
 /**
  * API endpoint to serve configuration (like Paystack key)
  * The key comes from environment variable
+ * Supports both test and live modes
  */
 app.get('/api/config', (req, res) => {
-    const paystackKey = process.env.PAYSTACK_PUBLIC_KEY || '';
-    if (!paystackKey) {
-        console.warn('⚠️ Warning: PAYSTACK_PUBLIC_KEY not found in environment variables.');
+    const paystackMode = process.env.PAYSTACK_MODE || 'test';
+    let paystackKey = '';
+    
+    if (paystackMode === 'test') {
+        // For test mode, try PAYSTACK_TEST_KEY first, then fall back to PAYSTACK_PUBLIC_KEY
+        paystackKey = process.env.PAYSTACK_TEST_KEY || process.env.PAYSTACK_PUBLIC_KEY || '';
+    } else {
+        // For live mode, use PAYSTACK_PUBLIC_KEY
+        paystackKey = process.env.PAYSTACK_PUBLIC_KEY || '';
     }
-    res.json({ paystackKey });
+    
+    if (!paystackKey) {
+        console.warn('⚠️ Warning: Paystack key not found in environment variables.');
+    }
+    
+    res.json({ paystackKey, mode: paystackMode });
 });
 
 /* ============================================
