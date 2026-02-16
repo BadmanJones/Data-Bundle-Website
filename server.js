@@ -294,21 +294,18 @@ app.get('/api/verify-payment', async (req, res) => {
         let paystackSecretKey = '';
         
         if (paystackMode === 'test') {
-            // For test mode, extract secret key from test public key
-            // Test public key format: pk_test_xxx -> secret would be sk_test_xxx
-            const testPublicKey = process.env.PAYSTACK_TEST_KEY || '';
-            paystackSecretKey = testPublicKey.replace('pk_test_', 'sk_test_');
+            // For test mode, use PAYSTACK_TEST_SECRET_KEY
+            paystackSecretKey = process.env.PAYSTACK_TEST_SECRET_KEY || '';
         } else {
-            // For live mode
-            const livePublicKey = process.env.PAYSTACK_PUBLIC_KEY || '';
-            paystackSecretKey = livePublicKey.replace('pk_live_', 'sk_live_');
+            // For live mode, use PAYSTACK_SECRET_KEY
+            paystackSecretKey = process.env.PAYSTACK_SECRET_KEY || '';
         }
         
         if (!paystackSecretKey) {
-            console.error('Paystack secret key not available');
+            console.error('Paystack secret key not available for mode:', paystackMode);
             return res.status(500).json({ 
                 status: 'error',
-                message: 'Paystack configuration error',
+                message: 'Paystack secret key not configured',
                 verified: false 
             });
         }
