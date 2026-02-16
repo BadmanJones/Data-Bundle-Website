@@ -573,6 +573,7 @@ function handleFormSubmit(event) {
     // Open Paystack payment modal
     console.log('Opening Paystack iframe...');
     try {
+        console.log('Before openIframe - handler:', handler ? 'EXISTS' : 'NULL');
         handler.openIframe();
         console.log('Paystack iframe opened successfully');
         
@@ -665,9 +666,11 @@ function handleFormSubmit(event) {
         window.paymentVerificationInterval = verifyPaymentInterval;
         
     } catch (error) {
-        console.error('Error opening Paystack iframe:', error);
+        console.error('❌ ERROR opening Paystack iframe:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         payButton.classList.remove('loading');
-        showToast('Error opening payment modal', 'error');
+        showToast('Error opening payment modal: ' + error.message, 'error');
     }
 }
 
