@@ -527,26 +527,20 @@ function handleFormSubmit(event) {
 
             console.log('Transaction data:', transactionData);
 
+            // Store in session storage for success page
+            sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
+
             // Send order to Admin Backend
             console.log('Calling sendOrderToAdminBackend...');
             sendOrderToAdminBackend(transactionData);
-            
-            // Export order to Excel file (with delay to ensure POST completes)
-            console.log('Calling exportOrderToExcel...');
-            setTimeout(() => {
-                exportOrderToExcel(transactionData);
-            }, 500);
-
-            // Store in session storage for success page
-            sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
 
             payButton.classList.remove('loading');
             showToast('Payment successful! Redirecting...', 'success');
 
-            // Redirect to success page (with longer delay to ensure requests complete)
+            // Redirect to success page immediately (don't wait for export)
             setTimeout(() => {
-                window.location.href = 'success.html';
-            }, 3000);
+                window.location.href = '/success';
+            }, 1500);
         }
     });
 

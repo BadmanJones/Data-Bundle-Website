@@ -64,6 +64,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
+// Serve success page
+app.get('/success', (req, res) => {
+    res.sendFile(path.join(__dirname, 'success.html'));
+});
+
 /* ============================================
    ORDER ROUTES
    ============================================ */
