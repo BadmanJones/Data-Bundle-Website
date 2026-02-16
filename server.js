@@ -73,27 +73,21 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files with error logging
+// **IMPORTANT: Serve static files FIRST before all routes**
 app.use(express.static(path.join(__dirname), {
-    maxAge: '1h',
-    etag: false,
-    index: false // Disable automatic index.html serving
+    maxAge: '1d',
+    etag: false
 }));
 
 console.log('Static files directory:', path.join(__dirname));
 
-// Serve root - index.html
+// Root route
 app.get('/', (req, res) => {
     console.log('GET / - Serving index.html');
-    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
-        if (err) {
-            console.error('Error serving index.html:', err.message);
-            res.status(500).send('Error loading page');
-        }
-    });
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve specific HTML pages
+// Specific HTML pages
 app.get('/buy', (req, res) => {
     res.sendFile(path.join(__dirname, 'buy.html'), (err) => {
         if (err) res.status(404).send('Page not found');
@@ -436,22 +430,6 @@ const server = app.listen(PORT, () => {
     4. Excel export available
     ========================================
     `);
-});
-
-/* ============================================
-   CATCH-ALL ROUTE (SPA) - MUST BE LAST
-   ============================================ */
-
-// Catch-all for other paths - serve index.html for SPA behavior
-app.get('*', (req, res) => {
-    console.log('Catch-all GET', req.path, '- Checking if file exists...');
-    const filePath = path.join(__dirname, req.path);
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        // Serve index.html for non-existent routes (SPA)
-        res.sendFile(path.join(__dirname, 'index.html'));
-    }
 });
 
 // Graceful shutdown
