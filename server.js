@@ -69,6 +69,21 @@ app.get('/success', (req, res) => {
     res.sendFile(path.join(__dirname, 'success.html'));
 });
 
+// Serve root - index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve HTML files directly
+app.get('/:page.html', (req, res) => {
+    const file = path.join(__dirname, `${req.params.page}.html`);
+    res.sendFile(file, (err) => {
+        if (err) {
+            res.status(404).send('Page not found');
+        }
+    });
+});
+
 /* ============================================
    ORDER ROUTES
    ============================================ */
