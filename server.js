@@ -271,6 +271,104 @@ app.get('/api/config', (req, res) => {
     res.json({ paystackKey, mode: paystackMode });
 });
 
+/**
+ * Verify payment with Paystack API
+ * Checks if a payment reference has been successfully verified
+ */
+app.get('/api/verify-payment', async (req, res) => {
+    const { ref } = req.query;
+    
+    console.log(`[Verification] Checking payment reference: ${ref}`);
+    
+    if (!ref) {
+        return res.status(400).json({ 
+            status: 'error',
+            message: 'Reference parameter required',
+            verified: false 
+        });
+    }
+    
+    try {
+        // Get Paystack secret key from environment
+        const paystackMode = process.env.PAYSTACK_MODE || 'test';
+        let paystackSecretKey = '';
+        
+        if (paystackMode === 'test') {
+            // For test mode, extract secret key from test public key
+            // Test public key format: pk_test_xxx -> secret would be sk_test_xxx
+            const testPublicKey = process.env.PAYSTACK_TEST_KEY || '';
+            paystackSecretKey = testPublicKey.replace('pk_test_', 'sk_test_');
+        } else {
+            // For live mode
+            const livePublicKey = process.env.PAYSTACK_PUBLIC_KEY || '';
+            paystackSecretKey = livePublicKey.replace('pk_live_', 'sk_live_');
+        }
+        
+        if (!paystackSecretKey) {
+            console.error('Paystack secret key not available');
+            return res.status(500).json({ 
+                status: 'error',
+                message: 'Paystack configuration error',
+                verified: false 
+            });
+        }
+        
+        // Call Paystack API to verify payment
+        const paystackResponse = await fetch(`https://api.paystack.co/transaction/verify/${ref}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${paystackSecretKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!paystackResponse.ok) {
+            console.log(`[Verification] Payment not found or error: ${paystackResponse.status}`);
+            return res.json({ 
+                status: 'pending',
+                verified: false,
+                message: 'Payment verification in progress'
+            });
+        }
+        
+        const paystackData = await paystackResponse.json();
+        
+        console.log(`[Verification] Paystack response:`, {
+            status: paystackData.status,
+            data: paystackData.data ? {
+                reference: paystackData.data.reference,
+                status: paystackData.data.status,
+                amount: paystackData.data.amount
+            } : null
+        });
+        
+        // Check if payment was successful
+        if (paystackData.status === true && paystackData.data.status === 'success') {
+            console.log(`[Verification] ✓ Payment VERIFIED: ${ref}`);
+            return res.json({ 
+                status: 'success',
+                verified: true,
+                amount: paystackData.data.amount,
+                reference: paystackData.data.reference
+            });
+        } else {
+            console.log(`[Verification] Payment not successful. Status: ${paystackData.data?.status}`);
+            return res.json({ 
+                status: 'pending',
+                verified: false,
+                paymentStatus: paystackData.data?.status || 'unknown'
+            });
+        }
+    } catch (error) {
+        console.error('[Verification] Error verifying payment:', error.message);
+        return res.status(500).json({ 
+            status: 'error',
+            message: 'Verification error: ' + error.message,
+            verified: false 
+        });
+    }
+});
+
 /* ============================================
    START SERVER
    ============================================ */

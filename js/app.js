@@ -496,56 +496,155 @@ function handleFormSubmit(event) {
     // Show loading state
     payButton.classList.add('loading');
 
+    // Generate transaction ID once - this is crucial for Paystack callbacks!
+    const transactionId = generateTransactionID();
+
+    console.log('=== PAYMENT SETUP ===');
+    console.log('Paystack Key:', PAYSTACK_PUBLIC_KEY ? 'SET' : 'NOT SET');
+    console.log('Amount:', amountInPesewas);
+    console.log('Transaction ID:', transactionId);
+
     // Initialize Paystack payment
     const handler = PaystackPop.setup({
         key: PAYSTACK_PUBLIC_KEY,
         email: email,
         amount: amountInPesewas,
         currency: 'GHS',
-        ref: generateTransactionID(),
+        ref: transactionId,
         onClose: function() {
-            payButton.classList.remove('loading');
-            showToast('Payment window closed', 'error');
+            console.log('=== PAYMENT MODAL CLOSED ===');
+            console.log('Payment verification polling continues...');
+            // Don't remove loading state - let verification polling handle it
         },
         onSuccess: function(response) {
-            // Payment successful
-            console.log('=== PAYMENT SUCCESS ===');
-            console.log('Response:', response);
-            
-            const transactionData = {
-                txnId: response.reference,
-                paystackReference: response.reference,
-                network: NETWORKS[selectedNetwork].name,
-                bundle: bundle.name,
-                phone: phoneNumber,
-                amount: bundle.price,
-                fullName: fullName,
-                email: email,
-                dateTime: getCurrentDateTime(),
-                status: 'success'
-            };
+            try {
+                // Clear polling interval since payment callback fired
+                if (window.paymentVerificationInterval) {
+                    clearInterval(window.paymentVerificationInterval);
+                    console.log('Cleared payment verification polling');
+                }
+                
+                // Payment successful
+                console.log('=== PAYMENT SUCCESS (Callback fired) ===');
+                console.log('Response:', response);
+                
+                const transactionData = {
+                    txnId: response.reference,
+                    paystackReference: response.reference,
+                    network: NETWORKS[selectedNetwork].name,
+                    bundle: bundle.name,
+                    phone: phoneNumber,
+                    amount: bundle.price,
+                    fullName: fullName,
+                    email: email,
+                    dateTime: getCurrentDateTime(),
+                    status: 'success'
+                };
 
-            console.log('Transaction data:', transactionData);
+                console.log('Transaction data:', transactionData);
 
-            // Store in session storage for success page
-            sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
+                // Store in session storage for success page
+                sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
 
-            // Send order to Admin Backend
-            console.log('Calling sendOrderToAdminBackend...');
-            sendOrderToAdminBackend(transactionData);
+                // Send order to Admin Backend
+                console.log('Calling sendOrderToAdminBackend...');
+                sendOrderToAdminBackend(transactionData);
 
-            payButton.classList.remove('loading');
-            showToast('Payment successful! Redirecting...', 'success');
+                payButton.classList.remove('loading');
+                showToast('Payment successful! Redirecting...', 'success');
 
-            // Redirect to success page immediately (don't wait for export)
-            setTimeout(() => {
-                window.location.href = '/success';
-            }, 1500);
+                // Redirect to success page immediately (don't wait for export)
+                setTimeout(() => {
+                    window.location.href = '/success';
+                }, 1500);
+            } catch (error) {
+                console.error('ERROR in onSuccess callback:', error);
+                console.error('Error stack:', error.stack);
+                // Clear polling interval on error
+                if (window.paymentVerificationInterval) {
+                    clearInterval(window.paymentVerificationInterval);
+                }
+                payButton.classList.remove('loading');
+                showToast('Error processing payment: ' + error.message, 'error');
+            }
         }
     });
 
     // Open Paystack payment modal
-    handler.openIframe();
+    console.log('Opening Paystack iframe...');
+    try {
+        handler.openIframe();
+        console.log('Paystack iframe opened successfully');
+        
+        // CRITICAL FIX: Paystack callbacks don't fire reliably, so we poll for payment verification
+        // Start polling after modal opens to check if payment was successful
+        let verificationAttempts = 0;
+        const maxAttempts = 25; // ~25 seconds of polling
+        
+        const verifyPaymentInterval = setInterval(async () => {
+            verificationAttempts++;
+            console.log(`[Payment Verification Attempt ${verificationAttempts}/${maxAttempts}] Checking if payment succeeded...`);
+            
+            try {
+                // Call our backend to verify the payment reference
+                const verifyResponse = await fetch(`/api/verify-payment?ref=${transactionId}`);
+                const verifyData = await verifyResponse.json();
+                
+                console.log('Verification response:', verifyData);
+                
+                if (verifyData.status === 'success' && verifyData.verified) {
+                    console.log('=== PAYMENT VERIFIED VIA API ===');
+                    clearInterval(verifyPaymentInterval);
+                    
+                    // Payment verified! Process the success
+                    const transactionData = {
+                        txnId: transactionId,
+                        paystackReference: transactionId,
+                        network: NETWORKS[selectedNetwork].name,
+                        bundle: bundle.name,
+                        phone: phoneNumber,
+                        amount: bundle.price,
+                        fullName: fullName,
+                        email: email,
+                        dateTime: getCurrentDateTime(),
+                        status: 'success'
+                    };
+
+                    console.log('Transaction data:', transactionData);
+                    sessionStorage.setItem('transactionData', JSON.stringify(transactionData));
+                    sendOrderToAdminBackend(transactionData);
+                    
+                    payButton.classList.remove('loading');
+                    showToast('Payment successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/success';
+                    }, 1500);
+                    
+                    return;
+                }
+            } catch (error) {
+                console.log('Verification call error (normal if payment not yet confirmed):', error.message);
+            }
+            
+            // Stop polling after max attempts
+            if (verificationAttempts >= maxAttempts) {
+                console.log('Max verification attempts reached');
+                clearInterval(verifyPaymentInterval);
+                payButton.classList.remove('loading');
+                // Don't show error - user might still complete on their phone
+                showToast('Please check if payment was deducted from your account', 'info');
+            }
+        }, 1000); // Check every 1 second
+        
+        // Store interval ID for cleanup
+        window.paymentVerificationInterval = verifyPaymentInterval;
+        
+    } catch (error) {
+        console.error('Error opening Paystack iframe:', error);
+        payButton.classList.remove('loading');
+        showToast('Error opening payment modal', 'error');
+    }
 }
 
 /* ============================================
