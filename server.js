@@ -73,13 +73,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// **IMPORTANT: Serve static files FIRST before all routes**
-app.use(express.static(path.join(__dirname), {
-    maxAge: '1d',
-    etag: false
-}));
-
-console.log('Static files directory:', path.join(__dirname));
+// **IMPORTANT: Define routes BEFORE static middleware**
+// Routes must execute before express.static to take priority
 
 // Root route
 app.get('/', (req, res) => {
@@ -106,11 +101,24 @@ app.get('/admin', (req, res) => {
     });
 });
 
+// SUCCESS ROUTE - CRITICAL: Must be before express.static!
 app.get('/success', (req, res) => {
+    console.log('GET /success - Serving success.html');
     res.sendFile(path.join(__dirname, 'success.html'), (err) => {
-        if (err) res.status(404).send('Page not found');
+        if (err) {
+            console.error('Error serving success.html:', err);
+            res.status(500).send('Error loading success page');
+        }
     });
 });
+
+// NOW serve static files (CSS, JS, Images, etc.) - AFTER defining routes
+app.use(express.static(path.join(__dirname), {
+    maxAge: '1d',
+    etag: false
+}));
+
+console.log('Static files directory:', path.join(__dirname));
 
 
 /* ============================================
