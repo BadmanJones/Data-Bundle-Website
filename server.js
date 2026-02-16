@@ -9,6 +9,7 @@ require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
@@ -34,11 +35,15 @@ const mongoClient = new MongoClient(MONGODB_URI, {
 async function connectToDatabase() {
     try {
         if (!MONGODB_URI) {
-            console.error('ERROR: DATABASE_URL environment variable is not set!');
-            console.error('Set it in your .env file or Vercel environment variables');
-            process.exit(1);
+            console.warn('⚠️ WARNING: DATABASE_URL environment variable is not set!');
+            console.warn('Set it in your .env file or Vercel environment variables');
+            console.warn('Static files will be served, but API endpoints will not work');
+            db = null;
+            ordersCollection = null;
+            return;
         }
 
+        console.log('Attempting to connect to MongoDB...');
         await mongoClient.connect();
         db = mongoClient.db('dataflow');
         ordersCollection = db.collection('orders');
@@ -50,39 +55,69 @@ async function connectToDatabase() {
         console.log('✓ Using database: dataflow');
         console.log('✓ Using collection: orders');
     } catch (error) {
-        console.error('Database connection error:', error.message);
-        process.exit(1);
+        console.error('⚠️ Database connection error:', error.message);
+        console.error('Static files will be served, but API will not work');
+        db = null;
+        ordersCollection = null;
     }
 }
 
-// Connect to database on startup
-connectToDatabase();
+// Connect to database on startup (non-blocking - errors won't crash the server)
+connectToDatabase().catch(err => {
+    console.error('Unhandled database connection error:', err);
+});
+
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
 
-// Serve success page
-app.get('/success', (req, res) => {
-    res.sendFile(path.join(__dirname, 'success.html'));
-});
+// Serve static files with error logging
+app.use(express.static(path.join(__dirname), {
+    maxAge: '1h',
+    etag: false,
+    index: false // Disable automatic index.html serving
+}));
+
+console.log('Static files directory:', path.join(__dirname));
 
 // Serve root - index.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Serve HTML files directly
-app.get('/:page.html', (req, res) => {
-    const file = path.join(__dirname, `${req.params.page}.html`);
-    res.sendFile(file, (err) => {
+    console.log('GET / - Serving index.html');
+    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
         if (err) {
-            res.status(404).send('Page not found');
+            console.error('Error serving index.html:', err.message);
+            res.status(500).send('Error loading page');
         }
     });
 });
+
+// Serve specific HTML pages
+app.get('/buy', (req, res) => {
+    res.sendFile(path.join(__dirname, 'buy.html'), (err) => {
+        if (err) res.status(404).send('Page not found');
+    });
+});
+
+app.get('/orders', (req, res) => {
+    res.sendFile(path.join(__dirname, 'orders.html'), (err) => {
+        if (err) res.status(404).send('Page not found');
+    });
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'), (err) => {
+        if (err) res.status(404).send('Page not found');
+    });
+});
+
+app.get('/success', (req, res) => {
+    res.sendFile(path.join(__dirname, 'success.html'), (err) => {
+        if (err) res.status(404).send('Page not found');
+    });
+});
+
 
 /* ============================================
    ORDER ROUTES
@@ -401,6 +436,22 @@ const server = app.listen(PORT, () => {
     4. Excel export available
     ========================================
     `);
+});
+
+/* ============================================
+   CATCH-ALL ROUTE (SPA) - MUST BE LAST
+   ============================================ */
+
+// Catch-all for other paths - serve index.html for SPA behavior
+app.get('*', (req, res) => {
+    console.log('Catch-all GET', req.path, '- Checking if file exists...');
+    const filePath = path.join(__dirname, req.path);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        // Serve index.html for non-existent routes (SPA)
+        res.sendFile(path.join(__dirname, 'index.html'));
+    }
 });
 
 // Graceful shutdown
